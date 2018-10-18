@@ -455,8 +455,6 @@ class Gls:
         """
         try:
             import matplotlib
-            if (matplotlib.get_backend() != "TkAgg"):
-                matplotlib.use("TkAgg")
             import matplotlib.pylab as mpl
         except ImportError:
             raise(ImportError("Could not import matplotlib.pylab."))
