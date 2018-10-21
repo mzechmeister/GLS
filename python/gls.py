@@ -24,6 +24,7 @@
 
 # Note : The software is also available as part of the PyAstronomy package.
 #        See: http://www.hs.uni-hamburg.de/DE/Ins/Per/Czesla/index.html
+#             https://github.com/sczesla/PyAstronomy/blob/master/src/pyTiming/pyPeriod/gls.py
 
 from __future__ import print_function, division
 import numpy as np
@@ -49,7 +50,7 @@ class Gls:
 
     Parameters
     ----------
-    lc : TimeSeries object or tuple or list or str
+    lc : tuple or list or str or TimeSeries object
         The light curve data either in the form of a TimeSeries object (or any
         object providing the attributes time, flux, and error) or a tuple or list
         or a filename as str providing time as first element, flux as second
@@ -104,16 +105,19 @@ class Gls:
     --------
     Create 1000 unevenly sampled data points with frequency=0.1,
     measurement error and Gaussian noise
+
     >>> time = np.random.uniform(54000., 56000., 1000)
     >>> flux = 0.15 * np.sin(2. * np.pi * time / 10.)
 
     Add some noise
+
     >>> error = 0.5 * np.ones(time.size)
     >>> flux += np.random.normal(0, error)
 
     Compute the full error-weighted Lomb-Periodogram
     in 'ZK' normalization and calculate the significance
     of the maximum peak.
+
     >>> gls = Gls((time, flux, error), verbose=True)
 
     >>> maxPower = gls.pmax
@@ -401,7 +405,13 @@ class Gls:
 
     def sinmod(self, t=None):
         """
-        Calcuate best-fit sine curve.
+        Calculate best-fit sine curve.
+
+        The parameters of the best-fit sine curve can be accessed via
+        the dictionary attribute `best`. Specifically, "amp" holds the
+        amplitude, "fbest" the best-fit frequency, "T0" the reference time
+        (i.e., time of zero phase), and "offset" holds the additive offset
+        of the sine wave. 
 
         Parameters
         ----------
@@ -455,6 +465,8 @@ class Gls:
         """
         try:
             import matplotlib
+            if (matplotlib.get_backend() != "TkAgg"):
+                matplotlib.use("TkAgg")
             import matplotlib.pylab as mpl
         except ImportError:
             raise(ImportError("Could not import matplotlib.pylab."))
@@ -573,7 +585,7 @@ class Gls:
         else:
            mpl.ion()
 
-        fig.tight_layout()   # to the margin left
+        fig.tight_layout()   # to get the left margin
         marleft = fig.subplotpars.left * fig.get_figwidth() * fig.dpi / fs
         def tighter():
            # keep margin tight when resizing
@@ -732,6 +744,10 @@ class Gls:
     def toFile(self, ofile, header=True):
         """
         Write periodogram to file.
+
+
+        The output file is a standard text file with two columns,
+        viz., frequency and power.
 
         Parameters
         ----------
