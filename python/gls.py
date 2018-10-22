@@ -465,8 +465,6 @@ class Gls:
         """
         try:
             import matplotlib
-            if (matplotlib.get_backend() != "TkAgg"):
-                matplotlib.use("TkAgg")
             import matplotlib.pylab as mpl
         except ImportError:
             raise(ImportError("Could not import matplotlib.pylab."))
@@ -514,19 +512,20 @@ class Gls:
 
         # Data and model
         col = mpl.cm.rainbow(mpl.Normalize()(self.t))
-        def plot(plt, x, y):
+        def plot_ecol(plt, x, y):
            # script for scatter plot with errorbars and time color-coded
            datstyle = dict(color=col, marker='.', edgecolor='k', linewidth=0.5, zorder=2)
-           errstyle = dict(yerr=self.e_y, marker='', ls='', elinewidth=0.5)
-           if matplotlib.__version__ < '2.' :
-              errstyle['capsize'] = 0.
-              datstyle['s'] = 8**2   # requires square size !?
-           else:
-              errstyle['ecolor'] = col
-           _, _, (c,) = plt.errorbar(x, y, **errstyle)
+           if self.e_y is not None:
+              errstyle = dict(yerr=self.e_y, marker='', ls='', elinewidth=0.5)
+              if matplotlib.__version__ < '2.' :
+                 errstyle['capsize'] = 0.
+                 datstyle['s'] = 8**2   # requires square size !?
+              else:
+                 errstyle['ecolor'] = col
+              _, _, (c,) = plt.errorbar(x, y, **errstyle)
+              if matplotlib.__version__ < '2.':
+                 c.set_color(col)
            plt.scatter(x, y, **datstyle)
-           if matplotlib.__version__ < '2.' :
-              c.set_color(col)
 
         def phase(t):
            #return (t-T0)*fbest % 1
@@ -539,7 +538,7 @@ class Gls:
         plt1 = fig.add_subplot(3, 2, 3)
         plt1.set_ylabel("Data")
         mpl.setp(plt1.get_xticklabels(), visible=False)
-        plot(plt1, self.t, self.y)
+        plot_ecol(plt1, self.t, self.y)
         plt1.plot(tt, ymod, 'k-', zorder=0)
 
         # Phase folded data
@@ -548,7 +547,7 @@ class Gls:
         plt2 = fig.add_subplot(3, 2, 4, sharey=plt1)
         mpl.setp(plt2.get_xticklabels(), visible=False)
         mpl.setp(plt2.get_yticklabels(), visible=False)
-        plot(plt2, phase(self.t), self.y)
+        plot_ecol(plt2, phase(self.t), self.y)
         xx = phase(tt)
         ii = np.argsort(xx)
         plt2.plot(xx[ii], yy[ii], 'k-')
@@ -559,14 +558,14 @@ class Gls:
         plt3 = fig.add_subplot(3, 2, 5, sharex=plt1)
         plt3.set_xlabel("Time")
         plt3.set_ylabel("Residuals")
-        plot(plt3, self.t, yres)
+        plot_ecol(plt3, self.t, yres)
         plt3.plot([self.t.min(), self.t.max()], [0,0], 'k-')
 
         # Phase folded residuals
         plt4 = fig.add_subplot(3, 2, 6, sharex=plt2, sharey=plt3)
         plt4.set_xlabel("Phase")
         mpl.setp(plt4.get_yticklabels(), visible=False)
-        plot(plt4, phase(self.t), yres)
+        plot_ecol(plt4, phase(self.t), yres)
         plt4.plot([0,1/fbest], [0,0], 'k-')
         plt4.format_coord = lambda x,y: "x=%g, x2=%g, y=%g"% (x, x*fbest, y)
 
