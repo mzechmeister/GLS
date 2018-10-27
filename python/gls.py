@@ -435,29 +435,35 @@ class Gls:
             print("Failed to calcuate best-fit sine curve.")
             raise(e)
 
-    def info(self):
+    def info(self, stdout=True):
         """
         Prints some basic statistical output screen.
         """
-        print("Generalized LS - statistical output")
-        print("-----------------------------------")
-        print("Number of input points:     %6d" % self.N)
-        print("Weighted mean of dataset:   %f"  % self._Y)
-        print("Weighted rms of dataset:    %f"  % sqrt(self._YY))
-        print("Time base:                  %f"  % self.tbase)
-        print("Number of frequency points: %6d" % self.nf)
-        print()
-        print("Maximum power p [%s]: %f" % (self.norm, self.power.max()))
-        print("RMS of residuals:     %f" % self.rms)
+        lines = ("Generalized LS - statistical output",
+           "-----------------------------------",
+           "Number of input points:     %6d" % self.N,
+           "Weighted mean of dataset:   %f"  % self._Y,
+           "Weighted rms of dataset:    %f"  % sqrt(self._YY),
+           "Time base:                  %f"  % self.tbase,
+           "Number of frequency points: %6d" % self.nf,
+           "",
+           "Maximum power p [%s]: %f" % (self.norm, self.power.max()),
+           "RMS of residuals:     %f" % self.rms)
         if self.e_y is not None:
-            print("  Mean weighted internal error:  %f" % (sqrt(self.N/sum(1./self.e_y**2))))
-        print("Best sine frequency:  %f +/- %f" % (self.best["f"], self.best["e_f"]))
-        print("Best sine period:     %f +/- %f" % (self.best["P"], self.best["e_P"]))
-        print("Amplitude:            %f +/- %f" % (self.best["amp"], self.best["e_amp"]))
-        #print("Phase (ph):           %f +/- %f" % (self.best["ph"], self.best["e_ph"]))
-        #print("Phase (T0):           %f +/- %f" % (self.best["T0"], self.best["e_T0"]))
-        #print("Offset:               %f +/- %f" % (self.best["offset"], self.best["e_offset"]))
-        print("-----------------------------------")
+           lines += "  Mean weighted internal error:  %f" % (sqrt(self.N/sum(1./self.e_y**2))),
+        lines += (
+           "Best sine frequency:  {f:f} +/- {e_f:f}",
+           "Best sine period:     {P:f} +/- {e_P:f}",
+           "Amplitude:            {amp:f} +/- {e_amp:f}",
+           #"Phase (ph):          {ph:f} +/- {e_ph:f}",
+           #"Phase (T0):          {T0:f} +/- {e_T0:f}",
+           #"Offset:              {offset:f} +/- {e_offset:f}",
+           "-----------------------------------")
+        text = "\n".join(lines).format(**self.best)
+        if stdout:
+           print(text)
+        else:
+           return text
 
     def plot(self, block=False, period=False):
         """
