@@ -173,17 +173,12 @@ class Gls:
         if isinstance(lc, str):
             # A data file has been given.
             try:
-               dat = np.loadtxt(lc, unpack=True)
-               lc = None
-               if len(dat) > 1:
-                  lc = dat[0], dat[1]
-               if len(dat) > 2:
-                  lc += dat[2],
+               lc = np.loadtxt(lc, unpack=True)[0:3]
             except Exception as e:
                print("An error occurred while trying to read data file:")
                print("  " + str(e))
 
-        if isinstance(lc, (tuple, list)):
+        if isinstance(lc, (tuple, list, np.ndarray)):
             # t, y[, e_y] were given as list or tuple.
             if len(lc) in (2, 3):
                 self.t = np.ravel(lc[0])
