@@ -10,6 +10,6 @@ A collection of the GLS for different programming languages available in
 * Fortran
 * [Python](python)
 * [IDL](idl)
-* Javascript
+* [Javascript](javascript)
 * [Matlab](matlab)
 
