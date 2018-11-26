@@ -1,6 +1,6 @@
 ;+
 ; Name        : GLS
-; Version     : v1.04 (2012/11/08)
+; Version     : v1.05 (2013-11-11)
 ;
 ; Purpose     : Calculate the generalised Lomb-Scargle periodogram
 ;                                (Zechmeister & Kuerster, 2009, A&A, 496, 577)
@@ -13,7 +13,7 @@
 ;
 ; Syntax      : IDL> gls, f, p, time, ydata [, dy
 ;                       fbeg=fbeg, pend=pend, fend=fend, pbeg=pbeg,
-;                       ofac=ofac, ind=ind,
+;                       ofac=ofac, yres=yres, sinpar=sinpar
 ;                       /ls, /nostat, /noplot, /refine]
 ;
 ; Inputs      : t  - time values
@@ -57,17 +57,13 @@
 ;        ...
 ;-
 ; changes:
-; bugfix T0
-; output of documentation for invalid nparams()
 ; code cleaned
-; one plot with three panel (instead of the three windows)
 
-FUNCTION sinewave, x,params
-;  params=[Freq, Amp, T0, offset]
-   nsin = n_elements(params)/4
-   par = reform(params,4,nsin)
+FUNCTION sinewave, x,par
+;  par = [Freq, Amp, T0, offset]
    y = 0
-   FOR i=0,nsin-1 DO y += par[1,i]*SIN(2*!DPI*par[0,i]*(x-par[2,i]))+par[3,i]
+   FOR i=0,N_ELEMENTS(par)-4,4 DO $
+      y += par[i+1]*SIN(2*!DPI*par[i]*(x-par[i+2])) + par[i+3]
    RETURN, y
 END
 
@@ -78,7 +74,7 @@ FUNCTION fitsin, t,y,params,dy=dy, yres=yres,BESTNORM=BESTNORM
 ; can fit simultaneously multiple sine waves
 ; Example     : IDL> t = findgen(100)
 ;               IDL> y = 30*sin(2.0*!dpi*(t-30.98)/27.0)+10
-;               IDL> y = y + 10*sin(2.0*!dpi*(t-17.23)/17.0)-5
+;               IDL> y += 10*sin(2.0*!dpi*(t-17.23)/17.0)-5
 ;               IDL> gls, f,p, t,y,    sinpar=par1,yres=yres
 ;               IDL> gls, f,p, t,yres, sinpar=par2
 ;               IDL> plot, t, y,ps=4 & oplot, t, sinewave(t, [[par1],[par2]]), col=244
@@ -86,12 +82,12 @@ FUNCTION fitsin, t,y,params,dy=dy, yres=yres,BESTNORM=BESTNORM
 ;               IDL> oplot, t, sinewave(t,parbest), col=150
 ;               IDL> print, ["Freq  Amp T0 offset"],par1,par2, ["new"], parbest
 
-   nsin = n_elements(params)/4
+   nsin = N_ELEMENTS(params)/4
    sinpar_new = params
    sinpar_new[3,*] = 0                      ; set all offsets to zero
-   sinpar_new[3,0] = total(params[3,*])     ; combine to a total offset
+   sinpar_new[3,0] = TOTAL(params[3,*])     ; combine to a total offset
    parinfo = REPLICATE({fixed:0}, nsin*4)
-   IF (nsin GT 1) THEN parinfo[7+4*INDGEN(nsin-1)].fixed = 1.  ; fix all offsets, but not the first
+   IF (nsin GT 1) THEN parinfo[7+4*INDGEN(nsin-1)].fixed = 1  ; fix all offsets, but not the first
    IF NOT KEYWORD_SET(dy) THEN dy = 1+0.*y  ; unit weights
    sinpar_new = MPFITEXPR('sinewave(x,P)', t,y,dy, sinpar_new,parinfo=parinfo, /QUIET,BESTNORM=BESTNORM)
    IF KEYWORD_SET(yres) THEN yres = y-sinewave(t, sinpar_new)
@@ -108,18 +104,11 @@ PRO GLS, f, p, time, ydata, dy,$
          sinpar=sinpar, yres=yres
 
 IF N_PARAMS() LT 4 THEN BEGIN ; output gls.pro documentation
-   OPENR, lun, (routine_info('GLS',/source)).path, /GET_LUN
-   glsdoc=''
-   WHILE (glsdoc NE ";-") DO BEGIN
-      READF, lun, glsdoc
-      PRINT, glsdoc
-   ENDWHILE
-   FREE_LUN, lun
-   PRINT, (routine_info('GLS',/source)).path
-   RETALL
+   DOC_LIBRARY, 'gls'
+   RETURN
 ENDIF
 
-twopi = 2.0*!DPI
+twopi = 2.0 * !DPI
 IF NOT KEYWORD_SET(ofac) THEN ofac = 20.    ; set default value
 
 ind = WHERE(FINITE(ydata),nt)      ; check for NaN values, nt = number of valid data points
@@ -132,9 +121,10 @@ y_data = ydata[ind]
 t = t_data - MIN(t_data)        ; shift the time serie
 tbase = MAX(t)                  ; time base
 
-IF N_ELEMENTS(dy) THEN y_err = dy[ind]     ; keep weights of valid data points
-w = N_ELEMENTS(y_err)? 1./(y_err)^2 : DOUBLE(1.+0.*y_data)     ; use user or unit weights
-w /= TOTAL(w)                ; normalize weights, now TOTAL(w)=1
+IF N_ELEMENTS(dy) GT 0 THEN y_err = dy[ind]        ; keep weights of valid data points
+w = N_ELEMENTS(y_err) GT 0? 1./(y_err)^2 : 1.      ; use user or unit weights
+wsum = N_ELEMENTS(y_err) GT 0? TOTAL(w) : nt
+w /= wsum                                 ; normalize weights, now TOTAL(w)=1
 
 Y  = TOTAL(w*y_data)        ; Eq.(7), Y is also the (weighted) mean of ydata
 wy = y_data-Y               ; shifting data to zero mean
@@ -142,15 +132,12 @@ wy = y_data-Y               ; shifting data to zero mean
 YY = TOTAL(w*wy^2)          ; Eq.(10), variance for the zero mean data
 wy = w*wy                   ; data with attached weights
 
-delta_f = 1./tbase/ofac     ; frequency sampling depends on the time span
-fmin    = delta_f           ; default for start frequency
+delta_f = 1./tbase/ofac     ; frequency sampling depends on the time span, default for start frequency
 delta_t = tbase/(nt-1)      ; mean time sampling
-fmax    = 0.5/delta_t       ; mean Nyquist frequency as default for end frequency
-
 
 ; check if the user has specified other ranges
-IF NOT KEYWORD_SET(fbeg) THEN fbeg = KEYWORD_SET(pend)? 1./pend : fmin
-IF NOT KEYWORD_SET(fend) THEN fend = KEYWORD_SET(pbeg)? 1./pbeg : fmax
+IF NOT KEYWORD_SET(fbeg) THEN fbeg = KEYWORD_SET(pend)? 1./pend : delta_f
+IF NOT KEYWORD_SET(fend) THEN fend = KEYWORD_SET(pbeg)? 1./pbeg : 0.5/delta_t ; default mean Nyquist frequency for end frequency
 
 ; check frequency limits
 IF (fend LT fbeg) THEN BEGIN
@@ -169,8 +156,8 @@ IF NOT KEYWORD_SET(nostat) THEN BEGIN
    PRINT,'  number of frequency points: ', nout
 ENDIF
 
-f = FINDGEN(nout)*delta_f+fbeg            ; set up the frequency grid
-P = DOUBLE(0*f) & A=P & B=P & off=P       ; initialize the power grid
+f = FINDGEN(nout)*delta_f + fbeg           ; set up the frequency grid
+P = DBLARR(nout) & A=P & B=P & off=P       ; initialize the power grid
 
 ; calculate the periodogram
 FOR k=0L,nout-1 DO BEGIN
@@ -230,9 +217,9 @@ sinpar = [fbest,Amp,T0,offset]                     ; summarise
 IF NOT KEYWORD_SET(nostat) THEN BEGIN
    PRINT,''
    PRINT,'  maximum power p:        ', p[i]
-   PRINT,'  rms of residuals:       ', SQRT(YY*(1-p[i]))
+   PRINT,'  rms of residuals:       ', rms
    IF KEYWORD_SET(dy) THEN $
-      PRINT,'  mean weighted internal error: ', SQRT(nt/TOTAL(1./y_err^2))
+      PRINT,'  mean weighted internal error: ', SQRT(nt/wsum)
    PRINT,'  best sine frequency f: ', fbest, f_err
    PRINT,'  best sine period Psin: ', 1./fbest, Psin_err
    PRINT,'   amplitude: ', Amp,   ' +/- ',STRTRIM(SQRT(2./nt)*rms,1)
@@ -246,16 +233,14 @@ ENDIF
 
 
 IF KEYWORD_SET(refine) THEN BEGIN
-   sinpar_new = MPFITEXPR('sinewave(x,P)', t_data, y_data, y_err, sinpar, /QUIET,PERROR=perr,BESTNORM=BESTNORM,DOF=DOF)
+   sinpar = MPFITEXPR('sinewave(x,P)', t_data, y_data, y_err, sinpar, /QUIET,PERROR=perr,BESTNORM=BESTNORM,DOF=DOF)
    perr *= SQRT(BESTNORM / DOF)      ; rescale errors with sqrt(chi^2_red)
-   yres = y_data - sinewave(t_data,sinpar_new)
-   sinpar = sinpar_new  ; update the returned parameters
    fbest = sinpar[0]
    Amp = sinpar[1]
    T0 = sinpar[2]
    offset = sinpar[3]
    PRINT,'refined parameters:'
-   PRINT,'  rms of residuals:      ', SQRT(TOTAL(yres^2*w))
+   PRINT,'  rms of residuals:      ', SQRT(BESTNORM/wsum)    ; SQRT(TOTAL(yres^2*w))
    PRINT,'  best sine frequency f: ', fbest, ' +/- ',STRTRIM(perr[0],1)
    PRINT,'  best sine period Psin: ', 1./fbest, ' +/- ',STRTRIM(perr[0]/fbest^2,1)
    PRINT,'   amplitude: ', Amp,    ' +/- ',STRTRIM(perr[1],1)
@@ -268,27 +253,28 @@ yres = ydata - sinewave(time,sinpar)
 
 ; graphical output
 IF NOT KEYWORD_SET(noplot) THEN BEGIN
-   loadct,39
+   TVLCT, 255,0,0, 100 ; red
+   !p.multi = [0,1,3]
    ; plot periodogram (power(frequency))
-   !p.multi=[0,1,3]
-   PLOT, f,p, xtitle="frequency", ytitle="power"
+   PLOT, f,p, xtitle="frequency", ytitle="power", charsiz=2
    IF NOT edgeflag THEN $
-      OPLOT, f,p[i]+aa*(f-f[i])^2,color=244  ; peak curvature
+      OPLOT, f, p[i]+aa*(f-f[i])^2, color=100  ; peak curvature
 
    ; plot time serie (t_i,y_i)
-   PLOT, t_data,y_data,psym=4, xtitle="time"
-   IF N_ELEMENTS(y_err) THEN OPLOTERR, t_data,y_data, y_err, 4
-   t_x = MIN(t_data)+tbase*(FINDGEN(200*tbase*fbest)/(200*tbase*fbest))
-   OPLOT, t_x, sinewave(t_x,sinpar), color=244
-   t_x = FINDGEN(1000)/1000
-   x = Amp*sin(twopi*t_x)+offset
+   PLOT, t_data, y_data, psym=4, xtitle="time", charsiz=2
+   IF N_ELEMENTS(y_err) GT 0 THEN OPLOTERR, t_data, y_data, y_err, 4
+   t_x = MIN(t_data) + FINDGEN(200*(tbase*fbest>1))/(199*fbest) ; at least one cycle
+   y_x = sinewave(t_x,sinpar)
+   OPLOT, t_x, y_x, color=100
 
    ; plot phase folded curve
-   PLOT, ((t_data-T0) MOD (1./fbest))*fbest,y_data, psym=4, xtitle="phase", xra=[0,1]
-   IF N_ELEMENTS(y_err) THEN OPLOTERR, ((t_data-T0) MOD (1./fbest))*fbest,y_data, y_err, 4
-   OPLOT, t_x,x,color=244
+   t_x = ((t_x[0:200-1]-T0)*fbest+1) MOD 1.  ; take first cycle
+   ind = sort(t_x)
+   PLOT, ((t_data-T0)*fbest+1) MOD 1., y_data, psym=4, xtitle="phase", xra=[0,1], charsiz=2
+   IF N_ELEMENTS(y_err) GT 0 THEN OPLOTERR, ((t_data-T0)*fbest+1) MOD 1., y_data, y_err, 4
+   OPLOT, t_x[ind], y_x[ind], color=100
    WSHOW
-   !p.multi=0
+   !p.multi = 0
 ENDIF
 
 END ; of program
