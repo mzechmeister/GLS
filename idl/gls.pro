@@ -1,6 +1,6 @@
 ;+
 ; Name        : GLS
-; Version     : v1.03 (2011/11/11)
+; Version     : v1.04 (2012/11/08)
 ;
 ; Purpose     : Calculate the generalised Lomb-Scargle periodogram
 ;                                (Zechmeister & Kuerster, 2009, A&A, 496, 577)
@@ -25,26 +25,24 @@
 ;
 ;               [optional outputs]
 ;               yres   - residuals of data
-;               ind    - index of used valid data points
-;                        (fitsin/MPFIT works only with valid data points)
 ;               sinpar - parameters of the sine wave
 ;                        [frequency, amplitude, phase T0, offset]
 ;                        hint: plot, sinewave(time, sinpar)
 ;
-; Keywords    : fbeg   - start frequency (default fbeg = 1./timebase/ofac)
+; Keywords    : fbeg   - start frequency (default: fbeg = 1./timebase/ofac)
 ;
-;               fend   - end frequency (default fend = .5*N/timebase
+;               fend   - end frequency (default: fend = .5*N/timebase
 ;                                        = average Nyquist frequency)
 ;
-;               pbeg   - start period (default pbeg = timebase*ofac)
+;               pbeg   - start period (default: pbeg = timebase*ofac)
 ;                        ignored, if fend is given
 ;
-;               pend   - end period (default pend = timebase*ofac)
+;               pend   - end period (default: pend = timebase*ofac)
 ;                        ignored, if fbeg is given
 ;
 ;               ls     - use the classical Lomb-Scargle periodogram
 ;
-;               ofac   - oversampling factor (default ofac = 20)
+;               ofac   - oversampling factor (default: ofac = 20)
 ;
 ;               nostat - no statistical info on screen
 ;
@@ -58,13 +56,18 @@
 ;        gls, f,p, t,yres1,yres=yres2
 ;        ...
 ;-
+; changes:
+; bugfix T0
+; output of documentation for invalid nparams()
+; code cleaned
+; one plot with three panel (instead of the three windows)
 
 FUNCTION sinewave, x,params
 ;  params=[Freq, Amp, T0, offset]
    nsin = n_elements(params)/4
    par = reform(params,4,nsin)
    y = 0
-   FOR i=0,nsin-1 DO y = y+par[1,i]*SIN(2*!DPI*par[0,i]*(x-par[2,i]))+par[3,i]
+   FOR i=0,nsin-1 DO y += par[1,i]*SIN(2*!DPI*par[0,i]*(x-par[2,i]))+par[3,i]
    RETURN, y
 END
 
@@ -102,24 +105,36 @@ END
 PRO GLS, f, p, time, ydata, dy,$
          fbeg=fbeg, fend=fend,  pbeg=pbeg, pend=pend, ofac=ofac, ls=ls,$
          nostat=nostat, noplot=noplot, refine=refine,$
-         ind=ind, sinpar=sinpar, yres=yres
+         sinpar=sinpar, yres=yres
+
+IF N_PARAMS() LT 4 THEN BEGIN ; output gls.pro documentation
+   OPENR, lun, (routine_info('GLS',/source)).path, /GET_LUN
+   glsdoc=''
+   WHILE (glsdoc NE ";-") DO BEGIN
+      READF, lun, glsdoc
+      PRINT, glsdoc
+   ENDWHILE
+   FREE_LUN, lun
+   PRINT, (routine_info('GLS',/source)).path
+   RETALL
+ENDIF
 
 twopi = 2.0*!DPI
 IF NOT KEYWORD_SET(ofac) THEN ofac = 20.    ; set default value
 
-ind = WHERE(FINITE(ydata) EQ 1,nt) ; check for NaN values, nt = number of valid data points
-t_data=time[ind]                   ; keep only the valid data points
-y_data=ydata[ind]
+ind = WHERE(FINITE(ydata),nt)      ; check for NaN values, nt = number of valid data points
+;                        (fitsin/MPFIT works only with valid data points)
+t_data = time[ind]                 ; keep only the valid data points
+y_data = ydata[ind]
 
 
 ; prepare input
 t = t_data - MIN(t_data)        ; shift the time serie
 tbase = MAX(t)                  ; time base
 
-w = DOUBLE(1.+0.*y_data)                        ; initialise unit weights
-IF (N_ELEMENTS(dy) GT 0) THEN y_err = dy[ind]   ; keep weights of valid data points
-IF (N_ELEMENTS(y_err) GT 0) THEN w = 1./(y_err)^2     ; use weights if given
-w = w / TOTAL(w)                ; normalize weights, now TOTAL(w)=1
+IF N_ELEMENTS(dy) THEN y_err = dy[ind]     ; keep weights of valid data points
+w = N_ELEMENTS(y_err)? 1./(y_err)^2 : DOUBLE(1.+0.*y_data)     ; use user or unit weights
+w /= TOTAL(w)                ; normalize weights, now TOTAL(w)=1
 
 Y  = TOTAL(w*y_data)        ; Eq.(7), Y is also the (weighted) mean of ydata
 wy = y_data-Y               ; shifting data to zero mean
@@ -134,12 +149,8 @@ fmax    = 0.5/delta_t       ; mean Nyquist frequency as default for end frequenc
 
 
 ; check if the user has specified other ranges
-IF KEYWORD_SET(pend) THEN fmin=1./pend
-IF KEYWORD_SET(fbeg) THEN fmin=fbeg
-fbeg = fmin
-IF KEYWORD_SET(pbeg) THEN fmax=1./pbeg
-IF KEYWORD_SET(fend) THEN fmax=fend
-fend = fmax
+IF NOT KEYWORD_SET(fbeg) THEN fbeg = KEYWORD_SET(pend)? 1./pend : fmin
+IF NOT KEYWORD_SET(fend) THEN fend = KEYWORD_SET(pbeg)? 1./pbeg : fmax
 
 ; check frequency limits
 IF (fend LT fbeg) THEN BEGIN
@@ -184,7 +195,7 @@ FOR k=0L,nout-1 DO BEGIN
    B[k] = (YS*CC-YC*CS) / D
    off[k] = -A[k]*C-B[k]*S
 
-   p[k]=(SS*YC^2/D+CC*YS^2/D-2.*CS*YC*YS/D)/YY    ; Eq.(5)
+   p[k] = (SS*YC^2/D+CC*YS^2/D-2.*CS*YC*YS/D)/YY    ; Eq.(5)
 ENDFOR
 
 
@@ -192,13 +203,13 @@ ENDFOR
 pmax = MAX(p,i)                           ; returns also the index i of the maximum power
 rms = SQRT(YY*(1-p[i]))
 ; get the curvature in the power peak by fitting a parabola y=aa*x^2
-edgeflag=0
+edgeflag = 0
 IF (i GT 0 AND i LT nout-1) THEN BEGIN
    xh = (f[i-1:i+1]-f[i])^2               ; shift the parabola origin to power peak
    yh = p[i-1:i+1]-p[i]
    aa = TOTAL(yh*xh)/TOTAL(xh*xh)         ; calculate the curvature (final equation from least square)
-   f_err    = ' +/-' + string(SQRT(-2./nt* p[i]/aa*(1-p[i])/p[i]))
-   Psin_err = ' +/-' + string(SQRT(-2./nt* p[i]/aa*(1-p[i])/p[i])/f[i]^2)
+   f_err    = ' +/- ' + STRTRIM(SQRT(-2./nt* p[i]/aa*(1-p[i])/p[i]),1)
+   Psin_err = ' +/- ' + STRTRIM(SQRT(-2./nt* p[i]/aa*(1-p[i])/p[i])/f[i]^2,1)
 ENDIF ELSE BEGIN
    edgeflag = 1
    f_err = ""
@@ -208,12 +219,12 @@ ENDIF ELSE BEGIN
    PRINT, '   Increase frequency range to sample the peak maximum.'
 ENDELSE
 
-fbest=f[i]
+fbest = f[i]
 Amp = SQRT(A[i]^2+B[i]^2)
 ph  = ATAN(A[i],B[i]) / twopi
-T0  = MIN(t_data[ind])-ph/f[i]
+T0  = MIN(t_data)-ph/f[i]
 offset = off[i]+Y                                  ; re-add the mean
-sinpar=[fbest,Amp,T0,offset]                       ; summarise
+sinpar = [fbest,Amp,T0,offset]                     ; summarise
 
 ; statistics:
 IF NOT KEYWORD_SET(nostat) THEN BEGIN
@@ -224,10 +235,10 @@ IF NOT KEYWORD_SET(nostat) THEN BEGIN
       PRINT,'  mean weighted internal error: ', SQRT(nt/TOTAL(1./y_err^2))
    PRINT,'  best sine frequency f: ', fbest, f_err
    PRINT,'  best sine period Psin: ', 1./fbest, Psin_err
-   PRINT,'   amplitude: ', Amp,   ' +/-',SQRT(2./nt)*rms
-   PRINT,'   phase ph:  ', ph,    ' +/-',SQRT(2./nt)*rms/Amp/twopi
-   PRINT,'   phase T0:  ', T0,    ' +/-',SQRT(2./nt)*rms/Amp/twopi/f[i]
-   PRINT,'   offset:    ', offset,' +/-',SQRT(1./nt)*rms
+   PRINT,'   amplitude: ', Amp,   ' +/- ',STRTRIM(SQRT(2./nt)*rms,1)
+   PRINT,'   phase ph:  ', ph,    ' +/- ',STRTRIM(SQRT(2./nt)*rms/Amp/twopi,1)
+   PRINT,'   phase T0:  ', T0,    ' +/- ',STRTRIM(SQRT(2./nt)*rms/Amp/twopi/f[i],1)
+   PRINT,'   offset:    ', offset,' +/- ',STRTRIM(SQRT(1./nt)*rms,1)
 ;   PRINT, '   Psin_err:', SQRT(6./nt)*2/twopi/tbase*rms/Amp/f[i]^2
 ;   PRINT, '   f_err:   ', SQRT(6./nt)*2/twopi/tbase*rms/Amp
 ;   PRINT, '   f_err:   ', SQRT(-2./nt* p[i]/aa*(1-p[i])/p[i]) ; error from peak curvature
@@ -235,20 +246,21 @@ ENDIF
 
 
 IF KEYWORD_SET(refine) THEN BEGIN
-   sinpar_new = MPFITEXPR('sinewave(x,P)', t_data, y_data, y_err, sinpar, /QUIET)
+   sinpar_new = MPFITEXPR('sinewave(x,P)', t_data, y_data, y_err, sinpar, /QUIET,PERROR=perr,BESTNORM=BESTNORM,DOF=DOF)
+   perr *= SQRT(BESTNORM / DOF)      ; rescale errors with sqrt(chi^2_red)
    yres = y_data - sinewave(t_data,sinpar_new)
-   sinpar=sinpar_new
+   sinpar = sinpar_new  ; update the returned parameters
    fbest = sinpar[0]
-   Amp   = sinpar[1]
-   T0    = sinpar[2]
-   offset= sinpar[3]
+   Amp = sinpar[1]
+   T0 = sinpar[2]
+   offset = sinpar[3]
    PRINT,'refined parameters:'
-   PRINT,'  rms of residuals:      ', SQRT(total(yres^2*w))
-   PRINT,'  best sine frequency f: ', fbest
-   PRINT,'  best sine period Psin: ', 1./fbest
-   PRINT,'   amplitude: ', Amp
-   PRINT,'   phase T0:  ', T0
-   PRINT,'   offset:    ', offset
+   PRINT,'  rms of residuals:      ', SQRT(TOTAL(yres^2*w))
+   PRINT,'  best sine frequency f: ', fbest, ' +/- ',STRTRIM(perr[0],1)
+   PRINT,'  best sine period Psin: ', 1./fbest, ' +/- ',STRTRIM(perr[0]/fbest^2,1)
+   PRINT,'   amplitude: ', Amp,    ' +/- ',STRTRIM(perr[1],1)
+   PRINT,'   phase T0:  ', T0,     ' +/- ',STRTRIM(perr[2],1)
+   PRINT,'   offset:    ', offset, ' +/- ',STRTRIM(perr[3],1)
 ENDIF
 
 ; calculate the residuals
@@ -258,28 +270,26 @@ yres = ydata - sinewave(time,sinpar)
 IF NOT KEYWORD_SET(noplot) THEN BEGIN
    loadct,39
    ; plot periodogram (power(frequency))
-   WINDOW,0, YSIZE=240 & PLOT, f,p, $
-      xtitle="frequency", ytitle="power"
-      IF NOT edgeflag THEN $
-         OPLOT, f,p[i]+aa*(f-f[i])^2,color=244  ; peak curvature
+   !p.multi=[0,1,3]
+   PLOT, f,p, xtitle="frequency", ytitle="power"
+   IF NOT edgeflag THEN $
+      OPLOT, f,p[i]+aa*(f-f[i])^2,color=244  ; peak curvature
 
    ; plot time serie (t_i,y_i)
-   WINDOW,1, YSIZE=240, YPOS=400 & PLOT, t_data,y_data,psym=4,$
-      xtitle="time"
-      IF (N_ELEMENTS(y_err) GT 0) THEN OPLOTERR, t_data,y_data, y_err, 4
+   PLOT, t_data,y_data,psym=4, xtitle="time"
+   IF N_ELEMENTS(y_err) THEN OPLOTERR, t_data,y_data, y_err, 4
    t_x = MIN(t_data)+tbase*(FINDGEN(200*tbase*fbest)/(200*tbase*fbest))
-      OPLOT, t_x, sinewave(t_x,sinpar),color=244
+   OPLOT, t_x, sinewave(t_x,sinpar), color=244
    t_x = FINDGEN(1000)/1000
-   x   =  Amp*sin(twopi*t_x)+offset
+   x = Amp*sin(twopi*t_x)+offset
 
    ; plot phase folded curve
-   WINDOW,5, YSIZE=240 & PLOT, ((t_data-T0) MOD (1./fbest))*fbest,y_data,psym=4,$
-      xtitle="phase", xra=[0,1]
-      IF (N_ELEMENTS(y_err) GT 0) THEN OPLOTERR, ((t_data-T0) MOD (1./fbest))*fbest,y_data, y_err, 4
-      OPLOT, t_x,x,color=244
+   PLOT, ((t_data-T0) MOD (1./fbest))*fbest,y_data, psym=4, xtitle="phase", xra=[0,1]
+   IF N_ELEMENTS(y_err) THEN OPLOTERR, ((t_data-T0) MOD (1./fbest))*fbest,y_data, y_err, 4
+   OPLOT, t_x,x,color=244
+   WSHOW
+   !p.multi=0
 ENDIF
 
-
 END ; of program
-
 
