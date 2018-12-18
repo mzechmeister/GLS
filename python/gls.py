@@ -31,7 +31,7 @@ import numpy as np
 from numpy import sum, pi, cos, sin, arctan2, exp, log, sqrt,\
                   dot, arange
 
-__version__ = '2018-10-17'
+__version__ = '2018-12-18'
 __author__ = 'Mathias Zechmeister, Stefan Czesla'
 
 class Gls:
@@ -170,9 +170,11 @@ class Gls:
             The error of the data values.
 
         """
+        self.df = ''
         if isinstance(lc, str):
             # A data file has been given.
             try:
+               self.df = lc
                lc = np.loadtxt(lc, unpack=True)[0:3]
             except Exception as e:
                print("An error occurred while trying to read data file:")
@@ -817,6 +819,5 @@ if __name__ == "__main__":
      gls.plot(block=True)
 
   if ofile:
-     gls.df = df
      gls.toFile(ofile)
 
