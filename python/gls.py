@@ -353,7 +353,7 @@ class Gls:
         elif norm == "dlnL":
             # dlnL = lnL - lnL0 = -0.5 chi^2 + 0.5 chi0^2 = 0.5 (chi0^2 - chi^2) = 0.5 chi0^2 p
             power = 0.5 * self._YY * self.wsum * p
-            self.label["ylabel"] = "dlnL"
+            self.label["ylabel"] = "$\Delta$lnL"
 
         self.power = power
 
