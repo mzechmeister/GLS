@@ -175,7 +175,7 @@ class Gls:
             # A data file has been given.
             try:
                self.df = lc
-               lc = np.loadtxt(lc, unpack=True)[0:3]
+               lc = np.genfromtxt(lc, unpack=True)[0:3]
             except Exception as e:
                print("An error occurred while trying to read data file:")
                print("  " + str(e))
