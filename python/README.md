@@ -39,4 +39,4 @@ gls your_data_file -fend 1.
 from gls import Gls
 ```
 and then see the example in
-https://github.com/mzechmeister/GLS/blob/ea66a022e40208920bfeff150f6d461a748d4df3/python/gls.py#L104-L126
+[gls.py#L104-L126](https://github.com/mzechmeister/GLS/blob/ea66a022e40208920bfeff150f6d461a748d4df3/python/gls.py#L104-L126)
