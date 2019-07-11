@@ -31,7 +31,7 @@ import numpy as np
 from numpy import sum, pi, cos, sin, arctan2, exp, log, sqrt,\
                   dot, arange
 
-__version__ = '2018-12-18'
+__version__ = '2019-07-11'
 __author__ = 'Mathias Zechmeister, Stefan Czesla'
 
 class Gls:
@@ -111,7 +111,7 @@ class Gls:
 
     Add some noise
 
-    >>> error = 0.5 * np.ones(time.size)
+    >>> error = 0.5 * np.ones_like(time)
     >>> flux += np.random.normal(0, error)
 
     Compute the full error-weighted Lomb-Periodogram
@@ -178,7 +178,7 @@ class Gls:
                lc = np.genfromtxt(lc, unpack=True)[0:3]
             except Exception as e:
                print("An error occurred while trying to read data file:")
-               print("  " + str(e))
+               print("  ", e)
 
         if isinstance(lc, (tuple, list, np.ndarray)):
             # t, y[, e_y] were given as list or tuple.
@@ -227,7 +227,7 @@ class Gls:
                 self.fend = self.fnyq * self.hifac if self.Pbeg is None else 1 / self.Pbeg
 
             if self.fend <= self.fbeg:
-                raise(ValueError("fend is smaller than (or equal to) fbeg but it must be larger." + \
+                raise(ValueError("fend is smaller than (or equal to) fbeg but it must be larger. " + \
                                "Choose fbeg and fend so that fend > fbeg."))
 
             self.f = arange(self.fbeg, self.fend, self.fstep)
@@ -310,8 +310,8 @@ class Gls:
 
         """
         if norm not in self.norms:
-            raise(ValueError("Unknown norm: " + str(norm) + ". " + \
-                "Use either of " + ', '.join(self.norms)))
+            raise(ValueError("Unknown norm: %s. " % norm + \
+                "Use either of %s." % ', '.join(self.norms)))
 
     def pnorm(self, norm="ZK"):
         """
@@ -342,18 +342,18 @@ class Gls:
             power = (self.N-3)/2. * p / (1.-self.p.max())
         elif norm == "chisq":
             power = self._YY *self.wsum * (1.-p)
-            self.label["ylabel"] = "chisq"
+            self.label["ylabel"] = "$\chi^2$"
         elif norm == "wrms":
             power = sqrt(self._YY*(1.-p))
             self.label["ylabel"] = "wrms"
         elif norm == "lnL":
             chi2 = self._YY *self.wsum * (1.-p)
             power = -0.5*chi2 - 0.5*np.sum(np.log(2*np.pi * self.e_y**2))
-            self.label["ylabel"] = "lnL"
+            self.label["ylabel"] = "$\ln L$"
         elif norm == "dlnL":
             # dlnL = lnL - lnL0 = -0.5 chi^2 + 0.5 chi0^2 = 0.5 (chi0^2 - chi^2) = 0.5 chi0^2 p
             power = 0.5 * self._YY * self.wsum * p
-            self.label["ylabel"] = "$\Delta$lnL"
+            self.label["ylabel"] = "$\Delta\ln L$"
 
         self.power = power
 
@@ -486,12 +486,12 @@ class Gls:
            plt.set_xscale("log")
            plt.set_xlabel("Period P")
         else:
-           plt.set_xlabel("Frequency f")
+           plt.set_xlabel("Frequency $f$")
 
         plt.set_ylabel(self.label["ylabel"])
         plt.plot(1/self.f if period else self.f, self.power, 'b-', linewidth=.5)
         # mark the highest peak
-        plt.plot(1/fbest if period else fbest, self.power[self.p.argmax()], 'r.', label="1/f = %f" % (1/fbest))
+        plt.plot(1/fbest if period else fbest, self.power[self.p.argmax()], 'r.', label="$1/f = %f$" % (1/fbest))
         plt.legend(numpoints=1, fontsize=fs, frameon=False)
 
         x2tics = 1/np.array([0.5, 1, 2, 3, 5, 10, 20., 100])
@@ -639,12 +639,19 @@ class Gls:
 
         """
         self._normcheck(self.norm)
-        if self.norm == "ZK": return (1.-Pn)**((self.N-3.)/2.)
         if self.norm == "Scargle": return exp(-Pn)
-        if self.norm == "HorneBaliunas": return (1.-2.*Pn/(self.N-1.))**((self.N-3.)/2.)
-        if self.norm == "Cumming": return (1.+2.*Pn/(self.N-3.))**(-(self.N-3.)/2.)
-        if self.norm == "wrms": return (Pn**2/self._YY)**((self.N-3.)/2.)
-        if self.norm == "chisq": return (Pn/self._YY/self.wsum)**((self.N-3.)/2.)
+        if self.norm == "HorneBaliunas": return (1-2*Pn/(self.N-1)) ** ((self.N-3)/2)
+        if self.norm == "Cumming": return (1+2*Pn/(self.N-3)) ** (-(self.N-3)/2)
+        if self.norm == "wrms": return (Pn**2/self._YY) ** ((self.N-3)/2)
+        if self.norm == "chisq": return (Pn/self._YY/self.wsum) ** ((self.N-3)/2)
+        if self.norm == "ZK":
+            p = Pn
+        if self.norm == "dlnL":
+            p = 2 * Pn / self._YY / self.wsum
+        if self.norm == "lnL":
+            chi2 = -2*Pn - np.sum(np.log(2*np.pi * self.e_y**2))
+            p = 1 - chi2/self._YY/self.wsum
+        return (1-p) ** ((self.N-3)/2)
 
     def probInv(self, Prob):
         """
@@ -665,12 +672,15 @@ class Gls:
 
         """
         self._normcheck(self.norm)
-        if self.norm == "ZK": return 1.-Prob**(2./(self.N-3.))
         if self.norm == "Scargle": return -log(Prob)
-        if self.norm == "HorneBaliunas": return (self.N-1) / 2. * (1.-Prob**(2./(self.N-3)))
-        if self.norm == "Cumming": return (self.N-3) / 2. * (Prob**(-2./(self.N-3.))-1.)
-        if self.norm == "wrms": return sqrt(self._YY * Prob**(2./(self.N-3.)))
-        if self.norm == "chisq": return self._YY * self.wsum * Prob**(2./(self.N-3.))
+        if self.norm == "HorneBaliunas": return (self.N-1) / 2 * (1-Prob**(2/(self.N-3)))
+        if self.norm == "Cumming": return (self.N-3) / 2 * (Prob**(-2./(self.N-3))-1)
+        if self.norm == "wrms": return sqrt(self._YY * Prob**(2/(self.N-3)))
+        if self.norm == "chisq": return self._YY * self.wsum * Prob**(2/(self.N-3))
+        p = 1 - Prob**(2/(self.N-3))
+        if self.norm == "ZK": return p
+        if self.norm == "lnL": return -0.5*self._YY*self.wsum*(1.-p) - 0.5*np.sum(np.log(2*np.pi * self.e_y**2))
+        if self.norm == "dlnL": return 0.5 * self._YY * self.wsum * p
 
     def FAP(self, Pn=None):
         """
@@ -702,7 +712,7 @@ class Gls:
            Pn = self.pmax
         prob = self.M * self.prob(Pn)
         if prob > 0.01:
-           return 1. - (1.-self.prob(Pn))**self.M
+           return 1 - (1-self.prob(Pn))**self.M
         return prob
 
     def powerLevel(self, FAPlevel):
