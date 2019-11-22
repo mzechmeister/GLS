@@ -600,9 +600,9 @@ class Gls:
 
         #fig.canvas.mpl_connect("resize_event", lambda _: (fig.tight_layout()))
         fig.canvas.mpl_connect("resize_event", lambda _: (tighter()))
-        mpl.show()
+        fig.show()
         # mpl.show(block=block) # unexpected keyword argument 'block' in older matplotlib
-        return mpl
+        return fig
 
     def prob(self, Pn):
         """
