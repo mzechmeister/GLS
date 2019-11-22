@@ -465,6 +465,11 @@ class Gls:
     def plot(self, block=False, period=False):
         """
         Create a plot.
+
+        Returns
+        -------
+        fig : mpl.figure
+            A figure which can be modified.
         """
         try:
             import matplotlib
