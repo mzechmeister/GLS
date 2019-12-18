@@ -31,7 +31,7 @@ import numpy as np
 from numpy import sum, pi, cos, sin, arctan2, exp, log, sqrt,\
                   dot, arange
 
-__version__ = '2019-07-11'
+__version__ = '2019-12-18'
 __author__ = 'Mathias Zechmeister, Stefan Czesla'
 
 class Gls:
@@ -462,9 +462,22 @@ class Gls:
         else:
            return text
 
-    def plot(self, block=False, period=False):
+    def plot(self, block=False, period=False, fap=None, gls=True, data=True, residuals=True):
         """
         Create a plot.
+
+        Parameters
+        ----------
+        period : boolean
+            The periodogram is plotted against log(Period).
+        fap : float, list
+            Plots the FAP levels.
+        gls : boolean
+            Plots the GLS periodogram.
+        data : boolean
+            Plots the data.
+        residuals : boolean
+            Plots the residuals.
 
         Returns
         -------
@@ -484,39 +497,50 @@ class Gls:
         fig.subplots_adjust(hspace=0.05, wspace=0.04, right=0.97, bottom=0.09, top=0.84)
         fs = 10   # fontsize
 
-        # Periodogram
-        plt = fig.add_subplot(3, 1, 1)
-        plt.tick_params(direction='in')
-        if period:
-           plt.set_xscale("log")
-           plt.set_xlabel("Period P")
-        else:
-           plt.set_xlabel("Frequency $f$")
+        nrow = gls + data + residuals
+        plt, plt1, plt2, plt3, plt4 = [None] * 5
 
-        plt.set_ylabel(self.label["ylabel"])
-        plt.plot(1/self.f if period else self.f, self.power, 'b-', linewidth=.5)
-        # mark the highest peak
-        plt.plot(1/fbest if period else fbest, self.power[self.p.argmax()], 'r.', label="$1/f = %f$" % (1/fbest))
-        plt.legend(numpoints=1, fontsize=fs, frameon=False)
+        if gls:
+           # Periodogram
+           plt = fig.add_subplot(nrow, 1, 1)
+           plt.tick_params(direction='in')
+           if period:
+              plt.set_xscale("log")
+              plt.set_xlabel("Period P")
+           else:
+              plt.set_xlabel("Frequency $f$")
 
-        x2tics = 1/np.array([0.5, 1, 2, 3, 5, 10, 20., 100])
-        mx2tics = 1/np.array([0.75, 1.5, 2.5, 4, 15, 40, 60., 80, 100])
-        def tick_function(X):
-           return ["%g" % (1/z) for z in X]
+           plt.set_ylabel(self.label["ylabel"])
+           plt.plot(1/self.f if period else self.f, self.power, 'b-', linewidth=.5)
+           # mark the highest peak
+           plt.plot(1/fbest if period else fbest, self.power[self.p.argmax()], 'r.', label="$1/f = %f$" % (1/fbest))
 
-        plt.tick_params(direction='in', which='both', top=True, right=True)
-        plt.minorticks_on()
-        plt.autoscale(enable=True, axis='x', tight=True)
-        if not period:
-           ax2 = plt.twiny()
-           ax2.tick_params(direction='in', which='both')
-           ax2.format_coord = lambda x,y: "x=%g, x2=%g, y=%g"% (x, 1/x, y)
-           ax2.set_xticks(x2tics)
-           ax2.set_xticks(mx2tics, minor=True)
-           ax2.set_xticklabels(tick_function(x2tics))
-           ax2.set_xlim(plt.get_xlim())
-           ax2.set_xlabel("Period")
-           plt.tick_params(top=False)
+           x2tics = 1 / np.array([0.5, 1, 2, 3, 5, 10, 20., 100])
+           mx2tics = 1 / np.array([0.75, 1.5, 2.5, 4, 15, 40, 60., 80, 100])
+           def tick_function(X):
+              return ["%g" % (1/z) for z in X]
+
+           plt.tick_params(direction='in', which='both', top=True, right=True)
+           plt.minorticks_on()
+           plt.autoscale(enable=True, axis='x', tight=True)
+           if not period:
+              ax2 = plt.twiny()
+              ax2.tick_params(direction='in', which='both')
+              ax2.format_coord = lambda x,y: "x=%g, x2=%g, y=%g"% (x, 1/x, y)
+              ax2.set_xticks(x2tics)
+              ax2.set_xticks(mx2tics, minor=True)
+              ax2.set_xticklabels(tick_function(x2tics))
+              ax2.set_xlim(plt.get_xlim())
+              ax2.set_xlabel("Period")
+              plt.tick_params(top=False)
+
+           if fap is not None:
+              if isinstance(fap, float):
+                 fap = [fap]
+              n = max(1, len(fap)-1)   # number of dash types
+              for i,fapi in enumerate(fap):
+                 plt.axhline(self.powerLevel(fapi), linewidth=0.5, color='r', dashes=(8+32*(n-i)/n,8+32*i/n), label="FAP = %s%%"%(fapi*100))
+           plt.legend(numpoints=1, fontsize=fs, frameon=False)
 
         # Data and model
         col = mpl.cm.rainbow(mpl.Normalize()(self.t))
@@ -539,45 +563,53 @@ class Gls:
            #return (t-T0)*fbest % 1
            return (t-T0) % (1/fbest)
 
-        # Time series
-        tt = arange(self.t.min(), self.t.max(), 0.01/fbest)
-        ymod = self.sinmod(tt)
-        yfit = self.sinmod()
-        plt1 = fig.add_subplot(3, 2, 3)
-        plt1.set_ylabel("Data")
-        mpl.setp(plt1.get_xticklabels(), visible=False)
-        plot_ecol(plt1, self.t, self.y)
-        plt1.plot(tt, ymod, 'k-', zorder=0)
+        if data:
+           # Time series
+           tt = arange(self.t.min(), self.t.max(), 0.01/fbest)
+           ymod = self.sinmod(tt)
+           plt1 = fig.add_subplot(nrow, 2, 2*gls+1)
+           plt1.set_ylabel("Data")
+           if residuals:
+              mpl.setp(plt1.get_xticklabels(), visible=False)
+           else:
+              plt1.set_xlabel("Time")
+           plot_ecol(plt1, self.t, self.y)
+           plt1.plot(tt, ymod, 'k-', zorder=0)
 
-        # Phase folded data
-        tt = arange(T0, T0+1/fbest, 0.01/fbest)
-        yy = self.sinmod(tt)
-        plt2 = fig.add_subplot(3, 2, 4, sharey=plt1)
-        mpl.setp(plt2.get_xticklabels(), visible=False)
-        mpl.setp(plt2.get_yticklabels(), visible=False)
-        plot_ecol(plt2, phase(self.t), self.y)
-        xx = phase(tt)
-        ii = np.argsort(xx)
-        plt2.plot(xx[ii], yy[ii], 'k-')
-        plt2.format_coord = lambda x,y: "x=%g, x2=%g, y=%g"% (x, x*fbest, y)
+           # Phase folded data
+           tt = arange(T0, T0+1/fbest, 0.01/fbest)
+           yy = self.sinmod(tt)
+           plt2 = fig.add_subplot(nrow, 2, 2*gls+2, sharey=plt1)
+           mpl.setp(plt2.get_yticklabels(), visible=False)
+           if residuals:
+              mpl.setp(plt2.get_xticklabels(), visible=False)
+           else:
+              plt2.set_xlabel("Phase")
+           plot_ecol(plt2, phase(self.t), self.y)
+           xx = phase(tt)
+           ii = np.argsort(xx)
+           plt2.plot(xx[ii], yy[ii], 'k-')
+           plt2.format_coord = lambda x,y: "x=%g, x2=%g, y=%g"% (x, x*fbest, y)
 
-        # Time serie of residuals
-        yres = self.y - yfit
-        plt3 = fig.add_subplot(3, 2, 5, sharex=plt1)
-        plt3.set_xlabel("Time")
-        plt3.set_ylabel("Residuals")
-        plot_ecol(plt3, self.t, yres)
-        plt3.plot([self.t.min(), self.t.max()], [0,0], 'k-')
+        if residuals:
+           # Time serie of residuals
+           yfit = self.sinmod()
+           yres = self.y - yfit
+           plt3 = fig.add_subplot(nrow, 2, 2*(gls+data)+1, sharex=plt1)
+           plt3.set_xlabel("Time")
+           plt3.set_ylabel("Residuals")
+           plot_ecol(plt3, self.t, yres)
+           plt3.plot([self.t.min(), self.t.max()], [0,0], 'k-')
 
-        # Phase folded residuals
-        plt4 = fig.add_subplot(3, 2, 6, sharex=plt2, sharey=plt3)
-        plt4.set_xlabel("Phase")
-        mpl.setp(plt4.get_yticklabels(), visible=False)
-        plot_ecol(plt4, phase(self.t), yres)
-        plt4.plot([0,1/fbest], [0,0], 'k-')
-        plt4.format_coord = lambda x,y: "x=%g, x2=%g, y=%g"% (x, x*fbest, y)
+           # Phase folded residuals
+           plt4 = fig.add_subplot(nrow, 2, 2*(gls+data)+2, sharex=plt2, sharey=plt3)
+           plt4.set_xlabel("Phase")
+           mpl.setp(plt4.get_yticklabels(), visible=False)
+           plot_ecol(plt4, phase(self.t), yres)
+           plt4.plot([0,1/fbest], [0,0], 'k-')
+           plt4.format_coord = lambda x,y: "x=%g, x2=%g, y=%g"% (x, x*fbest, y)
 
-        for x in [plt1, plt2, plt3, plt4]:
+        for x in fig.get_axes()[2:]:
            x.tick_params(direction='in', which='both', top=True, right=True)
            x.minorticks_on()
            x.autoscale(enable=True, tight=True)
@@ -598,10 +630,13 @@ class Gls:
            # keep margin tight when resizing
            xdpi = fs / (fig.get_figwidth() * fig.dpi)
            ydpi = fs / (fig.get_figheight() * fig.dpi)
-           fig.subplots_adjust(bottom=4.*ydpi, top=1-8.*ydpi, right=1-1*xdpi, wspace=4*xdpi, hspace=4*ydpi, left=marleft*xdpi)
-           if matplotlib.__version__ < '2.':
-              ax2.set_position(plt.get_position().translated(0,4*ydpi))
-           plt.set_position(plt.get_position().translated(0,4*ydpi))
+           fig.subplots_adjust(bottom=4.*ydpi, top=1-ydpi-4*gls*ydpi, right=1-1*xdpi, wspace=4*xdpi, hspace=4*ydpi, left=marleft*xdpi)
+           if gls and (residuals or data):
+              # gls plot needs additional space for x2axis
+              fig.subplots_adjust(top=1-8*ydpi)
+              if matplotlib.__version__ < '2.':
+                 ax2.set_position(plt.get_position().translated(0,4*ydpi))
+              plt.set_position(plt.get_position().translated(0,4*ydpi))
 
         #fig.canvas.mpl_connect("resize_event", lambda _: (fig.tight_layout()))
         fig.canvas.mpl_connect("resize_event", lambda _: (tighter()))
