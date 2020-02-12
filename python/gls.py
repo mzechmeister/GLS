@@ -619,10 +619,6 @@ class Gls:
             mpl.get_current_fig_manager().toolbar.pan()
         #t = fig.canvas.toolbar
         #mpl.ToggleTool(mpl.wx_ids['Pan'], False)
-        if block:
-           print("Close the plot to continue.")
-        else:
-           mpl.ion()
 
         fig.tight_layout()   # to get the left margin
         marleft = fig.subplotpars.left * fig.get_figwidth() * fig.dpi / fs
@@ -641,6 +637,13 @@ class Gls:
         #fig.canvas.mpl_connect("resize_event", lambda _: (fig.tight_layout()))
         fig.canvas.mpl_connect("resize_event", lambda _: (tighter()))
         fig.show()
+        if block:
+           print("Close the plot to continue.")
+           # needed when called from shell
+           mpl.show()
+        else:
+           # avoids blocking when: import test_gls
+           mpl.ion()
         # mpl.show(block=block) # unexpected keyword argument 'block' in older matplotlib
         return fig
 
