@@ -1,0 +1,150 @@
+<html>
+<head>
+   <meta charset="utf-8">
+   <title>GLS</title>
+
+<!--<script type="text/javascript" src="http://d3js.org/d3.v2.js"></script>
+<script type="text/javascript">
+d3.text('GJ1046.dat', function(text){
+  console.log(d3.csv.parseRows(text));
+//  document.write(JSON.stringify(data));
+})
+document.write(" aaaa"  + text[0]+ "<br>");
+  </script>-->
+   <style type="text/css">
+      label {
+         display: inline-block;
+         width: 4em;
+         text-align: right;
+      }
+   </style>
+</head>
+
+<body style="font-family: verdana; font-size: 70%">
+
+<script type="text/javascript">
+   function parse() {
+      var i, ii=0, txt="Parsing", n=lines.length;
+      document.getElementById("uploadinfo").innerHTML = "file info<br>number of lines: "+n;
+
+      line = "";
+      parsed = '<table style="width:50%; font-size: 100%">';
+      parsed += "<tr>";
+      parsed += "<td>#</td>";
+      parsed += "<td>t</td>";
+      parsed += "<td>y</td>";
+      parsed += "<td>yerr</td>";
+      parsed += "</tr>";
+      t = [];
+      y = [];
+      e = [];
+      for (i=0; i<n; ++i) {
+         line = lines[i];
+         if (line[0]!="") {
+            line = line[0].split(/\ +/);
+            t.push(parseFloat(line[0]));
+            y.push(parseFloat(line[1]));
+            e.push(parseFloat(line[2]));
+            parsed += " <tr><td>" +(ii+1)+"</td><td>"+t[ii]+"</td><td>" +y[ii]+"</td><td>" +e[ii]+ "</td></tr>";
+            ++ii;
+         };
+      };
+      parsed += '</table>';
+      document.getElementById("output").innerHTML = parsed;
+      document.getElementById("demo").innerHTML = txt;
+   }
+
+   function download() {
+      var i, out="";
+      for (i=0; i<gls.f.length; i++) {out += gls.f[i]+" "+gls.p[i]+"\n";}
+      document.getElementById("glsfile").href = "data:text/plain," + encodeURI(out);
+   };
+</script>
+
+<h3>Data</h3>
+<div id="datafield" style="width: 100%;">
+<div id="datafield_left" style="float: left; width: 33%;">
+   <fieldset><legend>Data loading</legend>
+      <script type="text/javascript" src="read-csv.js"></script>
+      <script type="text/javascript" src="gls.js"></script>
+      <label>file:</label><input type="file" id="csvFileInput" onchange="handleFiles(this.files)"><br>
+      <label>url:</label><input type="url" id="urlFileInput" value="not supported yet"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value)">
+     <div id="uploadinfo">
+     file info
+     </div>
+     <div id="debug"></div>
+
+     <div id="output" style="height:200px;border:1px solid #ccc; overflow:auto;">
+     data
+     </div>
+   </fieldset>
+</div>
+</div>
+
+
+<script type="text/javascript"
+  src="http://dygraphs.com/dygraph-combined.js"></script>
+<div id="dataplot" style="float: left; width: 66%;"></div>
+
+<br>
+
+<script>
+function transpose(mat) {
+// transpose matrix
+return mat[0].map(function(col, i) {
+  return mat.map(function(row) {
+    return row[i]
+  })
+});
+};
+
+function plotdata(x,y) {
+// Create graph with native array as data source
+//data =  [ [1,10], [2,20], [3,50], [4,70] ];
+g = new Dygraph(document.getElementById("dataplot"), transpose([x, y]), {drawPoints: true, strokeWidth: 0, labels: [ "t", "y" ] });
+};
+
+function plotGLS(x,y) {
+// Create graph with native array as data source
+g = new Dygraph(document.getElementById("GLSplot"), transpose([x, y]), {labels: [ "t", "p" ], title: "Periodogram" });
+};
+</script>
+
+<br style="clear:both" />
+
+<h3>Periodogram</h3>
+
+<div id="GLSinput"  style="float: left; width: 33%;">
+   <fieldset><legend>Parameters</legend>
+       <span title="start frequency"><label>f_beg:</label><input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
+      <span title="end frequency"><label>f_end:</label><input type="float" id="fend" placeholder="auto"></span><br>
+      <span title="osampling factor for frequency steps"><label>ofac:</label><input type="float" id="ofac" placeholder="20"></span><br>
+      <label>mode:</label><span title="Generalisied Lomb-Scargle"><input type="radio" id="gls" name="gls" checked>GLS</span>
+      <span title="Lomb-Scargle (no floating offset)"><input type="radio" id="ls" name="gls">LS</span><br>
+      <span title="weight"><label></label><input type="checkbox" title="weight" id="weighted" value="weights" checked>use errors</span><br>
+      <button onclick="parse(); plotdata(t,y);
+         gls = GLS(t,y,{yerr:document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
+         document.getElementById('demo').innerHTML = '<label>fbest:</label> '+gls.f[gls.k]+'<br><label>Pbest:</label> '+1/gls.f[gls.k]+'<br><label>p_max:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
+         plotGLS(gls.f,gls.p); download()" style="float: right;">Calculate</button>
+   </fieldset>
+   <br>
+   <fieldset><legend>Results</legend>
+      <p id="demo"></p>
+      <label>file:</label> <a download='gls.dat' href="gls.dat" id="glsfile">gls.dat</a> (Periodogram in ascii format)
+   </fieldset>
+</div>
+
+<div id="GLSplot" style="float: left; width: 66%;">
+GLSplot
+</div>
+
+<br style="clear:both" />
+
+
+</body>
+
+<footer>
+by M. Zechmeister 2016-02-08
+</footer>
+
+</html>
