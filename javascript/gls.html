@@ -24,6 +24,7 @@ document.write(" aaaa"  + text[0]+ "<br>");
 
 <script type="text/javascript">
    function parse() {
+      // parse data file into arrays and create table preview
       var i, ii=0, txt="Parsing", n=lines.length;
       document.getElementById("uploadinfo").innerHTML = "file info<br>number of lines: "+n;
 
@@ -40,8 +41,8 @@ document.write(" aaaa"  + text[0]+ "<br>");
       e = [];
       for (i=0; i<n; ++i) {
          line = lines[i];
-         if (line[0]!="") {
-            line = line[0].split(/\ +/);
+         if (line!="") {
+            line = line.split(/\ +/);
             t.push(parseFloat(line[0]));
             y.push(parseFloat(line[1]));
             e.push(parseFloat(line[2]));
