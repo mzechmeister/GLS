@@ -24,6 +24,7 @@ document.write(" aaaa"  + text[0]+ "<br>");
 
 <script type="text/javascript">
    function parse() {
+      delim = RegExp(document.getElementById('delim').value);
       // parse data file into arrays and create table preview
       var i, ii=0, txt="Parsing", n=lines.length;
       document.getElementById("uploadinfo").innerHTML = "file info<br>number of lines: "+n;
@@ -42,7 +43,7 @@ document.write(" aaaa"  + text[0]+ "<br>");
       for (i=0; i<n; ++i) {
          line = lines[i];
          if (line!="") {
-            line = line.split(/\ +/);
+            line = line.split(delim);
             t.push(parseFloat(line[0]));
             y.push(parseFloat(line[1]));
             e.push(parseFloat(line[2]));
@@ -68,16 +69,23 @@ document.write(" aaaa"  + text[0]+ "<br>");
    <fieldset><legend>Data loading</legend>
       <script type="application/javascript" src="https://cdn.jsdelivr.net/gh/mzechmeister/GLS@master/javascript/read-csv.js"></script>
       <script type="application/javascript" src="https://cdn.jsdelivr.net/gh/mzechmeister/GLS@master/javascript/gls.js"></script>
-      <label>file:</label><input type="file" id="csvFileInput" onchange="handleFiles(this.files)"><br>
+      <label>file:</label><input type="file" id="csvFileInput" onchange="handleFiles(this.files)">
+      <label>delimiter:</label>
+      <select id="delim">
+         <option value=" +" title="multiple space" selected=true>" +"</option>
+         <option value=" " title="space">" "</option>
+         <option value="," title="comma">","</option>
+         <option value=";" title="semicolon">";"</option>
+         </select><br>
       <label>url:</label><input type="url" id="urlFileInput" value="not supported yet"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value)">
-     <div id="uploadinfo">
-     file info
-     </div>
-     <div id="debug"></div>
+      <div id="uploadinfo">
+      file info
+      </div>
+      <div id="debug"></div>
 
-     <div id="output" style="height:200px;border:1px solid #ccc; overflow:auto;">
-     data
-     </div>
+      <div id="output" style="height:200px;border:1px solid #ccc; overflow:auto;">
+      no data
+      </div>
    </fieldset>
 </div>
 </div>
@@ -145,7 +153,7 @@ GLSplot
 </body>
 
 <footer>
-by M. Zechmeister 2016-02-08
+<a href="https://github.com/mzechmeister/GLS/tree/master/javascript">view code on github</a>, by M. Zechmeister 2019-03-28
 </footer>
 
 </html>
