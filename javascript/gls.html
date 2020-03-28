@@ -33,7 +33,7 @@ document.write(" aaaa"  + text[0]+ "<br>");
       parsed += "<td>#</td>";
       parsed += "<td>t</td>";
       parsed += "<td>y</td>";
-      parsed += "<td>yerr</td>";
+      parsed += "<td>e_y</td>";
       parsed += "</tr>";
       t = [];
       y = [];
@@ -123,7 +123,7 @@ g = new Dygraph(document.getElementById("GLSplot"), transpose([x, y]), {labels: 
       <span title="Lomb-Scargle (no floating offset)"><input type="radio" id="ls" name="gls">LS</span><br>
       <span title="weight"><label></label><input type="checkbox" title="weight" id="weighted" value="weights" checked>use errors</span><br>
       <button onclick="parse(); plotdata(t,y);
-         gls = GLS(t,y,{yerr:document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
+         gls = GLS(t,y,{e_y:document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
          document.getElementById('demo').innerHTML = '<label>fbest:</label> '+gls.f[gls.k]+'<br><label>Pbest:</label> '+1/gls.f[gls.k]+'<br><label>p_max:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
          plotGLS(gls.f,gls.p); download()" style="float: right;">Calculate</button>
    </fieldset>

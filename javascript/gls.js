@@ -3,10 +3,10 @@ The generalised Lomb-Scargle periodogram
                      (Zechmeister & Kuerster, 2009, A&A, 496, 577)
 
 Author: M. Zechmeister (Institut for Astrophysics Goettingen)
-Version: 2015-02-09 (1.00)
+Version: 2019-03-28 (1.00)
 
 gls = GLS(t_data, y_data, kwargs)
-kwargs = {yerr:yerr, fbeg:fbeg, fend:fend, ofac:ofac, ls:ls}
+kwargs = {e_y:e_y, fbeg:fbeg, fend:fend, ofac:ofac, ls:ls}
 */
 
 function dot(x, y) {
@@ -45,7 +45,7 @@ function GLS(t_data, y_data, kwargs) {
    tbase = Math.max.apply(null, t);
 
    i = nt = t.length;
-   while(i--) wsum += w[i]= (kwargs.yerr? 1./kwargs.yerr[i]/kwargs.yerr[i] : 1.);
+   while(i--) wsum += w[i]= (kwargs.e_y? 1./kwargs.e_y[i]/kwargs.e_y[i] : 1.);
 
    // normalize weights, now "wsum=1"
    i = nt;
