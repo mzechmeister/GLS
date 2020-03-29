@@ -71,7 +71,7 @@ document.write(" aaaa"  + text[0]+ "<br>");
       <script type="application/javascript" src="gls.js"></script>
       <label>file:</label><input type="file" id="csvFileInput" onchange="handleFiles(this.files)">
       <label>delimiter:</label>
-      <select id="delim">
+      <select id="delim" onChange="parse()" title="regex for delimiter">
          <option value=" +" title="multiple space" selected=true>" +"</option>
          <option value=" " title="space">" "</option>
          <option value="," title="comma">","</option>
