@@ -124,18 +124,20 @@ g = new Dygraph(document.getElementById("GLSplot"), transpose([x, y]), {labels: 
 <h3>Periodogram</h3>
 
 <div id="GLSinput"  style="float: left; width: 33%;">
+   <form action="javascript:parse(); plotdata(t,y);
+         gls = GLS(t,y,{e_y:document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
+         document.getElementById('demo').innerHTML = '<label>fbest:</label> '+gls.f[gls.k]+'<br><label>Pbest:</label> '+1/gls.f[gls.k]+'<br><label>p_max:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
+         plotGLS(gls.f,gls.p); download();">
    <fieldset><legend>Parameters</legend>
-       <span title="start frequency"><label>f_beg:</label><input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
+      <span title="start frequency"><label>f_beg:</label><input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
       <span title="end frequency"><label>f_end:</label><input type="float" id="fend" placeholder="auto"></span><br>
       <span title="osampling factor for frequency steps"><label>ofac:</label><input type="float" id="ofac" placeholder="20"></span><br>
       <label>mode:</label><span title="Generalisied Lomb-Scargle"><input type="radio" id="gls" name="gls" checked>GLS</span>
       <span title="Lomb-Scargle (no floating offset)"><input type="radio" id="ls" name="gls">LS</span><br>
       <span title="weight"><label></label><input type="checkbox" title="weight" id="weighted" value="weights" checked>use errors</span><br>
-      <button onclick="parse(); plotdata(t,y);
-         gls = GLS(t,y,{e_y:document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
-         document.getElementById('demo').innerHTML = '<label>fbest:</label> '+gls.f[gls.k]+'<br><label>Pbest:</label> '+1/gls.f[gls.k]+'<br><label>p_max:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
-         plotGLS(gls.f,gls.p); download()" style="float: right;">Calculate</button>
+      <button style="float: right;">Calculate</button>
    </fieldset>
+   </form>
    <br>
    <fieldset><legend>Results</legend>
       <p id="demo"></p>
