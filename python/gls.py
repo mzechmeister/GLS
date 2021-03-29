@@ -616,7 +616,10 @@ class Gls:
 
         if hasattr(mpl.get_current_fig_manager(), 'toolbar'):
             # check seems not needed when "TkAgg" is set
-            mpl.get_current_fig_manager().toolbar.pan()
+            try:
+                mpl.get_current_fig_manager().toolbar.pan()
+            except:
+                pass # e.g. Jupyter
         #t = fig.canvas.toolbar
         #mpl.ToggleTool(mpl.wx_ids['Pan'], False)
 
