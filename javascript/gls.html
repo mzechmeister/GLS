@@ -70,6 +70,7 @@ document.write(" aaaa"  + text[0]+ "<br>");
       <script type="application/javascript" src="read-csv.js"></script>
       <script type="application/javascript" src="gls.js"></script>
       <label>file:</label><input type="file" id="csvFileInput" onchange="handleFiles(this.files)">
+      <label>url:</label><input type="url" id="urlFileInput" value="http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value)">
       <label>delimiter:</label>
       <select id="delim" onChange="parse()" title="regex for delimiter">
          <option value=" +" title="multiple space" selected=true>" +"</option>
@@ -77,7 +78,6 @@ document.write(" aaaa"  + text[0]+ "<br>");
          <option value="," title="comma">","</option>
          <option value=";" title="semicolon">";"</option>
          </select><br>
-      <label>url:</label><input type="url" id="urlFileInput" value="not supported yet"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value)">
       <div id="uploadinfo">
       file info
       </div>
