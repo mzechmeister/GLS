@@ -15,6 +15,18 @@ d3.text('GJ1046.dat', function(text){
          width: 4em;
          text-align: right;
       }
+
+      .ftable tr:not(.fble_htr) {
+         counter-increment: rowNumber;
+      }
+      .ftable tr:not(.fble_htr) td:first-child::before {
+         content: counter(rowNumber);
+         float: right;
+         vertical-align: super;
+         font-size: smaller;
+         color: grey;
+         margin-right: 1.em;
+      }
    </style>
 </head>
 
@@ -25,15 +37,13 @@ d3.text('GJ1046.dat', function(text){
       delim = RegExp(document.getElementById('delim').value);
       // parse data file into arrays and create table preview
       var i, ii=0, txt="Parsing", n=lines.length;
-      document.getElementById("uploadinfo").innerHTML = "file info<br>number of lines: "+n;
 
-      line = "";
-      parsed = '<table style="width:50%; font-size: 100%">';
-      parsed += "<tr>";
-      parsed += "<td>#</td>";
+      parsed = '<table class="ftable" style="width:50%; font-size: 100%">';
+      parsed += "<tr class='fble_htr'>";
+      parsed += "<td></td>";
       parsed += "<td>t</td>";
       parsed += "<td>y</td>";
-      parsed += "<td>e_y</td>";
+      parsed += "<td>e<sub>y</sub></td>";
       parsed += "</tr>";
       t = [];
       y = [];
@@ -45,11 +55,12 @@ d3.text('GJ1046.dat', function(text){
             t.push(parseFloat(line[0]));
             y.push(parseFloat(line[1]));
             e.push(parseFloat(line[2]));
-            parsed += " <tr><td>" +(ii+1)+"</td><td>"+t[ii]+"</td><td>" +y[ii]+"</td><td>" +e[ii]+ "</td></tr>";
+            parsed += "<tr><td></td><td>"+t[ii]+"</td><td>" +y[ii]+"</td><td>" +e[ii]+ "</td></tr>";
             ++ii;
          };
       };
       parsed += '</table>';
+      document.getElementById("uploadinfo").innerHTML = "file info<br>number of lines: "+t.length;
       document.getElementById("output").innerHTML = parsed;
       document.getElementById("demo").innerHTML = txt;
    }
