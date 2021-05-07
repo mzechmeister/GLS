@@ -7,9 +7,7 @@
 <script type="text/javascript">
 d3.text('GJ1046.dat', function(text){
   console.log(d3.csv.parseRows(text));
-//  document.write(JSON.stringify(data));
 })
-document.write(" aaaa"  + text[0]+ "<br>");
   </script>-->
    <style type="text/css">
       label {
@@ -69,8 +67,8 @@ document.write(" aaaa"  + text[0]+ "<br>");
    <fieldset><legend>Data loading</legend>
       <script type="application/javascript" src="read-csv.js"></script>
       <script type="application/javascript" src="gls.js"></script>
-      <label>file:</label><input type="file" id="csvFileInput" onchange="handleFiles(this.files)">
-      <label>url:</label><input type="url" id="urlFileInput" value="http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value)">
+      <label>file:</label><input type="file" id="csvFileInput" onchange="handleFiles(this.files)"><br>
+      <label>url:</label><input type="url" id="urlFileInput" value="http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value)"><br>
       <label>delimiter:</label>
       <select id="delim" onChange="parse()" title="regex for delimiter">
          <option value=" +" title="multiple space" selected=true>" +"</option>
@@ -91,9 +89,8 @@ document.write(" aaaa"  + text[0]+ "<br>");
 </div>
 
 
-<script type="text/javascript"
-  src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
-<div id="dataplot" style="float: left; width: 66%;"></div>
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<div id="dataplot" style="float: left; width: 66%; height: 300px"></div>
 
 <br>
 
@@ -107,15 +104,30 @@ return mat[0].map(function(col, i) {
 });
 };
 
+
+var fmtaxis = {tickformat: 'g',
+           linecolor: 'black', mirror: true,
+           ticks:"inside", "mirror" : "allticks"}
+
 function plotdata(x,y) {
-// Create graph with native array as data source
-//data =  [ [1,10], [2,20], [3,50], [4,70] ];
-g = new Dygraph(document.getElementById("dataplot"), transpose([x, y]), {drawPoints: true, strokeWidth: 0, labels: [ "t", "y" ] });
+Plotly.newPlot('dataplot',
+     [{x:x, y:y, mode: 'markers', marker:{color: "#0000FFAA"}}],
+     {xaxis: {title: 'Time', ...fmtaxis},
+      yaxis: fmtaxis,
+      margin: {l: 50, r: 10, b: 40, t: 10},
+      modebar: {position: 'bottom'},
+     },
+     {responsive: true});
 };
 
 function plotGLS(x,y) {
-// Create graph with native array as data source
-g = new Dygraph(document.getElementById("GLSplot"), transpose([x, y]), {labels: [ "t", "p" ], title: "Periodogram" });
+g = Plotly.newPlot('GLSplot',
+     [{x:x, y:y, line:{color: "#0000FFAA", width: 1}}],
+     {xaxis: {title: 'Frequency', ...fmtaxis},
+      yaxis: {rangemode: 'tozero', autorange: true, ...fmtaxis},
+      margin: {l: 50, r: 10, b: 40, t: 10},
+     },
+     {responsive: true});
 };
 </script>
 
@@ -123,7 +135,7 @@ g = new Dygraph(document.getElementById("GLSplot"), transpose([x, y]), {labels: 
 
 <h3>Periodogram</h3>
 
-<div id="GLSinput"  style="float: left; width: 33%;">
+<div id="GLSinput"  style="float: left; width: 33%">
    <form action="javascript:parse(); plotdata(t,y);
          gls = GLS(t,y,{e_y:document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
          document.getElementById('demo').innerHTML = '<label>fbest:</label> '+gls.f[gls.k]+'<br><label>Pbest:</label> '+1/gls.f[gls.k]+'<br><label>p_max:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
@@ -145,8 +157,7 @@ g = new Dygraph(document.getElementById("GLSplot"), transpose([x, y]), {labels: 
    </fieldset>
 </div>
 
-<div id="GLSplot" style="float: left; width: 66%;">
-GLSplot
+<div id="GLSplot" style="float: left; width: 66%; height: 300px">
 </div>
 
 <br style="clear:both" />
@@ -155,7 +166,7 @@ GLSplot
 </body>
 
 <footer>
-<a href="https://github.com/mzechmeister/GLS/tree/master/javascript">view code on github</a>, by M. Zechmeister 2019-03-28
+<a href="https://github.com/mzechmeister/GLS/tree/master/javascript">view code on github</a>, by M. Zechmeister 2021-05-07
 </footer>
 
 </html>
