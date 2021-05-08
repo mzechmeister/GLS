@@ -99,6 +99,24 @@ d3.text('GJ1046.dat', function(text){
 </div>
 </div>
 
+<script>
+   var dropZone = document.getElementById('datafield_left');
+
+   // Optional. Show the copy icon when dragging over.
+   dropZone.addEventListener('dragover', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+   });
+
+   // Get file data on drop
+   dropZone.addEventListener('drop', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      handleFiles(e.dataTransfer.files);
+   });
+</script>
+
 
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <div id="dataplot" style="float: left; width: 66%; height: 300px"></div>
