@@ -79,7 +79,7 @@ d3.text('GJ1046.dat', function(text){
       <script type="application/javascript" src="read-csv.js"></script>
       <script type="application/javascript" src="gls.js"></script>
       <label>file:</label><input type="file" id="csvFileInput" onchange="handleFiles(this.files)"><br>
-      <label>url:</label><input type="url" id="urlFileInput" value="http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value)"><br>
+      <label>url:</label><input type="url" id="urlFileInput" value="http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"  onkeyup="if (event.key === 'Enter')  {handleURL(this.value)};"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value)"><br>
       <label>delimiter:</label>
       <select id="delim" onChange="parse()" title="regex for delimiter">
          <option value=" +" title="multiple space" selected=true>" +"</option>
