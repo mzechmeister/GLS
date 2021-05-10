@@ -66,22 +66,6 @@
       document.getElementById("glsfile").href = "data:text/plain," + encodeURI(out);
    };
 
-   var dropZone = document.getElementById('datafield_left');
-
-   // Optional. Show the copy icon when dragging over.
-   dropZone.addEventListener('dragover', function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-   });
-
-   // Get file data on drop
-   dropZone.addEventListener('drop', function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      handleFiles(e.dataTransfer.files);
-   });
-
    function transpose(mat) {
    // transpose matrix
       return mat[0].map(function(col, i) {
@@ -126,6 +110,21 @@
 <br>
 
 <script>
+   var dropZone = document.getElementById('datafield_left');
+
+   // Optional. Show the copy icon when dragging over.
+   dropZone.addEventListener('dragover', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+   });
+
+   // Get file data on drop
+   dropZone.addEventListener('drop', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      handleFiles(e.dataTransfer.files);
+   });
 
 var fmtaxis = {tickformat: 'g',
            linecolor: 'black', mirror: true,
