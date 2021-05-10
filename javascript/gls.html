@@ -3,12 +3,6 @@
    <meta charset="utf-8">
    <title>GLS</title>
 
-<!--<script type="text/javascript" src="http://d3js.org/d3.v2.js"></script>
-<script type="text/javascript">
-d3.text('GJ1046.dat', function(text){
-  console.log(d3.csv.parseRows(text));
-})
-  </script>-->
    <style type="text/css">
       label {
          display: inline-block;
@@ -32,6 +26,7 @@ d3.text('GJ1046.dat', function(text){
 
 <body style="font-family: verdana; font-size: 70%">
 
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <script type="text/javascript">
    function parse() {
       delim = RegExp(document.getElementById('delim').value);
@@ -70,9 +65,36 @@ d3.text('GJ1046.dat', function(text){
       for (i=0; i<gls.f.length; i++) {out += gls.f[i]+" "+gls.p[i]+"\n";}
       document.getElementById("glsfile").href = "data:text/plain," + encodeURI(out);
    };
+
+   var dropZone = document.getElementById('datafield_left');
+
+   // Optional. Show the copy icon when dragging over.
+   dropZone.addEventListener('dragover', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+   });
+
+   // Get file data on drop
+   dropZone.addEventListener('drop', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      handleFiles(e.dataTransfer.files);
+   });
+
+   function transpose(mat) {
+   // transpose matrix
+      return mat[0].map(function(col, i) {
+         return mat.map(function(row) {
+            return row[i]
+         })
+      });
+   };
+
 </script>
 
 <h3>Data</h3>
+
 <div id="datafield" style="width: 100%;">
 <div id="datafield_left" style="float: left; width: 33%;">
    <fieldset><legend>Data loading</legend>
@@ -99,40 +121,11 @@ d3.text('GJ1046.dat', function(text){
 </div>
 </div>
 
-<script>
-   var dropZone = document.getElementById('datafield_left');
-
-   // Optional. Show the copy icon when dragging over.
-   dropZone.addEventListener('dragover', function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-   });
-
-   // Get file data on drop
-   dropZone.addEventListener('drop', function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      handleFiles(e.dataTransfer.files);
-   });
-</script>
-
-
-<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <div id="dataplot" style="float: left; width: 66%; height: 300px"></div>
 
 <br>
 
 <script>
-function transpose(mat) {
-// transpose matrix
-return mat[0].map(function(col, i) {
-  return mat.map(function(row) {
-    return row[i]
-  })
-});
-};
-
 
 var fmtaxis = {tickformat: 'g',
            linecolor: 'black', mirror: true,
