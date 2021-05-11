@@ -22,7 +22,7 @@ function handleURL(url) {
          lines = lines.split(/\r\n|\n/)
          //lines = lines.slice(1,-1);
          parse();
-         plotdata(t,y);
+         plotdata(t,y,e);
       } else {
          document.getElementById("output").innerHTML = "<a href='"+url+"'>"+url+"</a><br> could not be loaded. Maybe a <a href='https://en.wikipedia.org/wiki/Cross-origin_resource_sharing'>CORS</a> issue. Try:<br>http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"
 // https://raw.githubusercontent.com/plotly/datasets/master/spectral.csv

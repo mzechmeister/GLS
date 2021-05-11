@@ -85,7 +85,7 @@
       <script type="application/javascript" src="read-csv.js"></script>
       <script type="application/javascript" src="gls.js"></script>
       <label>file:</label><input type="file" id="csvFileInput" onchange="handleFiles(this.files)"><br>
-      <label>url:</label><input type="url" id="urlFileInput" value="http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"  onkeyup="if (event.key === 'Enter')  {handleURL(this.value)};"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value)"><br>
+      <label>url:</label><input type="url" id="urlFileInput" value="https://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"  onkeyup="if (event.key === 'Enter')  {handleURL(this.value)};"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value)"><br>
       <label>delimiter:</label>
       <select id="delim" onChange="parse()" title="regex for delimiter">
          <option value=" +" title="multiple space" selected=true>" +"</option>
@@ -130,26 +130,40 @@ var fmtaxis = {tickformat: 'g',
            linecolor: 'black', mirror: true,
            ticks:"inside", "mirror" : "allticks"}
 
-function plotdata(x,y) {
-Plotly.newPlot('dataplot',
-     [{x:x, y:y, mode: 'markers', marker:{color: "#0000FFAA"}}],
-     {xaxis: {title: 'Time', ...fmtaxis},
-      yaxis: fmtaxis,
-      margin: {l: 50, r: 10, b: 40, t: 10},
-      modebar: {position: 'bottom'},
-     },
-     {responsive: true});
+function plotdata(x,y, e=[]) {
+   Plotly.newPlot('dataplot',
+      [{x:x, y:y,
+        error_y:{
+          type: 'data',
+          array: e,
+          thickness:1.,
+          width:1.5,
+          color: "#0000FF66"
+        },
+        mode: 'markers', marker:{color: "#0000FFAA"}}],
+      {xaxis: {title: 'Time', ...fmtaxis},
+       yaxis: fmtaxis,
+       margin: {l: 50, r: 10, b: 40, t: 10},
+       modebar: {position: 'bottom'},
+      },
+      {responsive: true});
+      errorbar_visibility();
 };
 
+function errorbar_visibility(){
+   document.getElementsByClassName("errorbars")[0].style["visibility"] = document.getElementById('weighted').checked? "visible" : "hidden";
+}
+
 function plotGLS(x,y) {
-g = Plotly.newPlot('GLSplot',
-     [{x:x, y:y, line:{color: "#0000FFAA", width: 1}}],
-     {xaxis: {title: 'Frequency', ...fmtaxis},
-      yaxis: {rangemode: 'tozero', autorange: true, ...fmtaxis},
-      margin: {l: 50, r: 10, b: 40, t: 10},
-     },
-     {responsive: true});
-};
+   Plotly.newPlot('GLSplot',
+      [{x:x, y:y, line:{color: "#0000FFAA", width: 1}}],
+      {xaxis: {title: 'Frequency', ...fmtaxis},
+       yaxis: {rangemode: 'tozero', autorange: true, ...fmtaxis},
+       margin: {l: 50, r: 10, b: 40, t: 10},
+      },
+      {responsive: true});
+   };
+
 </script>
 
 <br style="clear:both" />
@@ -157,7 +171,7 @@ g = Plotly.newPlot('GLSplot',
 <h3>Periodogram</h3>
 
 <div id="GLSinput"  style="float: left; width: 33%">
-   <form action="javascript:parse(); plotdata(t,y);
+   <form action="javascript:parse(); plotdata(t,y,e);
          gls = GLS(t,y,{e_y:document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
          document.getElementById('demo').innerHTML = '<label>fbest:</label> '+gls.f[gls.k]+'<br><label>Pbest:</label> '+1/gls.f[gls.k]+'<br><label>p_max:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
          plotGLS(gls.f,gls.p); download();">
@@ -167,7 +181,7 @@ g = Plotly.newPlot('GLSplot',
       <span title="osampling factor for frequency steps"><label>ofac:</label><input type="float" id="ofac" placeholder="20"></span><br>
       <label>mode:</label><span title="Generalisied Lomb-Scargle"><input type="radio" id="gls" name="gls" checked>GLS</span>
       <span title="Lomb-Scargle (no floating offset)"><input type="radio" id="ls" name="gls">LS</span><br>
-      <span title="weight"><label></label><input type="checkbox" title="weight" id="weighted" value="weights" checked>use errors</span><br>
+      <span title="weight"><label></label><input type="checkbox" title="weight" id="weighted" value="weights" checked onclick="errorbar_visibility()">use errors</span><br>
       <button style="float: right;">Calculate</button>
    </fieldset>
    </form>
