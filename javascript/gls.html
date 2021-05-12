@@ -4,6 +4,8 @@
    <title>GLS</title>
 
    <style type="text/css">
+      .e_grey td:nth-child(4) { color:grey }
+
       label {
          display: inline-block;
          width: 4em;
@@ -54,6 +56,7 @@
             ++ii;
          };
       };
+      document.getElementById("weighted").disabled = e.some(x => isNaN(x))
       parsed += '</table>';
       document.getElementById("uploadinfo").innerHTML = "file info<br>number of lines: "+t.length;
       document.getElementById("output").innerHTML = parsed;
@@ -151,7 +154,9 @@ function plotdata(x,y, e=[]) {
 };
 
 function errorbar_visibility(){
-   document.getElementsByClassName("errorbars")[0].style["visibility"] = document.getElementById('weighted').checked? "visible" : "hidden";
+   visible = !document.getElementById('weighted').disabled && document.getElementById('weighted').checked
+   document.getElementsByClassName("errorbars")[0].style["visibility"] = visible? "visible" : "hidden";
+   document.getElementsByClassName("ftable")[0].className = "ftable" + (visible? "" : " e_grey")
 }
 
 function plotGLS(x,y) {
@@ -171,8 +176,8 @@ function plotGLS(x,y) {
 <h3>Periodogram</h3>
 
 <div id="GLSinput"  style="float: left; width: 33%">
-   <form action="javascript:parse(); plotdata(t,y,e);
-         gls = GLS(t,y,{e_y:document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
+   <form action="javascript: plotdata(t,y,e);
+         gls = GLS(t,y,{e_y:!document.getElementById('weighted').disabled && document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
          document.getElementById('demo').innerHTML = '<label>fbest:</label> '+gls.f[gls.k]+'<br><label>Pbest:</label> '+1/gls.f[gls.k]+'<br><label>p_max:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
          plotGLS(gls.f,gls.p); download();">
    <fieldset><legend>Parameters</legend>
