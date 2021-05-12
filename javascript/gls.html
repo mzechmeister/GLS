@@ -4,24 +4,25 @@
    <title>GLS</title>
 
    <style type="text/css">
-      .e_grey td:nth-child(4) { color:grey }
-
       label {
          display: inline-block;
          width: 4em;
          text-align: right;
       }
 
-      .ftable tr:not(.fble_htr) {
+      .e_grey td:nth-child(4) { color:grey }
+ 
+      td { padding: 0px 3px; }
+
+      .ftable tr:nth-child(n+2){
          counter-increment: rowNumber;
       }
-      .ftable tr:not(.fble_htr) td:first-child::before {
+      .ftable tr:nth-child(n+2) td:first-child::before {
          content: counter(rowNumber);
          float: right;
          vertical-align: super;
          font-size: smaller;
          color: grey;
-         margin-right: 1.em;
       }
    </style>
 </head>
@@ -36,7 +37,7 @@
       var i, ii=0, txt="Parsing", n=lines.length;
 
       parsed = '<table class="ftable" style="width:50%; font-size: 100%">';
-      parsed += "<tr class='fble_htr'>";
+      parsed += "<tr>";
       parsed += "<td></td>";
       parsed += "<td>t</td>";
       parsed += "<td>y</td>";
@@ -83,7 +84,9 @@
 <h3>Data</h3>
 
 <div id="datafield" style="width: 100%;">
-<div id="datafield_left" style="float: left; width: 33%;">
+<div id="datafield_left" style="float: left; width: 33%;"
+        ondragover="dragover(event)"
+        ondrop="drop(event)">
    <fieldset><legend>Data loading</legend>
       <script type="application/javascript" src="read-csv.js"></script>
       <script type="application/javascript" src="gls.js"></script>
@@ -99,7 +102,6 @@
       <div id="uploadinfo">
       file info
       </div>
-      <div id="debug"></div>
 
       <div id="output" style="height:200px;border:1px solid #ccc; overflow:auto;">
       no data
@@ -110,26 +112,22 @@
 
 <div id="dataplot" style="float: left; width: 66%; height: 300px"></div>
 
-<br>
-
 <script>
-   var dropZone = document.getElementById('datafield_left');
-
    // Optional. Show the copy icon when dragging over.
-   dropZone.addEventListener('dragover', function(e) {
+   function dragover(e) {
       e.stopPropagation();
       e.preventDefault();
       e.dataTransfer.dropEffect = 'copy';
-   });
+   };
 
    // Get file data on drop
-   dropZone.addEventListener('drop', function(e) {
+   function drop(e) {
       e.stopPropagation();
       e.preventDefault();
       handleFiles(e.dataTransfer.files);
-   });
+   };
 
-var fmtaxis = {tickformat: 'g',
+   var fmtaxis = {tickformat: 'g',
            linecolor: 'black', mirror: true,
            ticks:"inside", "mirror" : "allticks"}
 
@@ -178,11 +176,11 @@ function plotGLS(x,y) {
 <div id="GLSinput"  style="float: left; width: 33%">
    <form action="javascript: plotdata(t,y,e);
          gls = GLS(t,y,{e_y:!document.getElementById('weighted').disabled && document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
-         document.getElementById('demo').innerHTML = '<label>fbest:</label> '+gls.f[gls.k]+'<br><label>Pbest:</label> '+1/gls.f[gls.k]+'<br><label>p_max:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
+         document.getElementById('demo').innerHTML = '<label>f<sub>best</sub>:</label> '+gls.f[gls.k]+'<br><label>P<sub>best</sub>:</label> '+1/gls.f[gls.k]+'<br><label>p<sub>max</sub>:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
          plotGLS(gls.f,gls.p); download();">
    <fieldset><legend>Parameters</legend>
-      <span title="start frequency"><label>f_beg:</label><input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
-      <span title="end frequency"><label>f_end:</label><input type="float" id="fend" placeholder="auto"></span><br>
+      <span title="start frequency"><label>f<sub>beg</sub>:</label><input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
+      <span title="end frequency"><label>f<sub>end</sub>:</label><input type="float" id="fend" placeholder="auto"></span><br>
       <span title="osampling factor for frequency steps"><label>ofac:</label><input type="float" id="ofac" placeholder="20"></span><br>
       <label>mode:</label><span title="Generalisied Lomb-Scargle"><input type="radio" id="gls" name="gls" checked>GLS</span>
       <span title="Lomb-Scargle (no floating offset)"><input type="radio" id="ls" name="gls">LS</span><br>
@@ -190,7 +188,7 @@ function plotGLS(x,y) {
       <button style="float: right;">Calculate</button>
    </fieldset>
    </form>
-   <br>
+
    <fieldset><legend>Results</legend>
       <p id="demo"></p>
       <label>file:</label> <a download='gls.dat' href="gls.dat" id="glsfile">gls.dat</a> (Periodogram in ascii format)
@@ -206,7 +204,7 @@ function plotGLS(x,y) {
 </body>
 
 <footer>
-<a href="https://github.com/mzechmeister/GLS/tree/master/javascript">view code on github</a>, by M. Zechmeister 2021-05-07
+view code on <a href="https://github.com/mzechmeister/GLS/tree/master/javascript">github</a>, by M. Zechmeister 2021-05-13
 </footer>
 
 </html>
