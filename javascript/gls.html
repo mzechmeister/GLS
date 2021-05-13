@@ -34,7 +34,7 @@
    function parse() {
       delim = RegExp(document.getElementById('delim').value);
       // parse data file into arrays and create table preview
-      var i, ii=0, txt="Parsing", n=lines.length;
+      var n=0, txt="Parsing";
 
       parsed = '<table class="ftable" style="width:50%; font-size: 100%">';
       parsed += "<tr>";
@@ -46,39 +46,28 @@
       t = [];
       y = [];
       e = [];
-      for (i=0; i<n; ++i) {
-         line = lines[i];
+      for (line of lines) {
          if (line!="") {
             line = line.split(delim);
             t.push(parseFloat(line[0]));
             y.push(parseFloat(line[1]));
             e.push(parseFloat(line[2]));
-            parsed += "<tr><td></td><td>"+t[ii]+"</td><td>" +y[ii]+"</td><td>" +e[ii]+ "</td></tr>";
-            ++ii;
+            parsed += "<tr><td></td><td>"+t[n]+"</td><td>" +y[n]+"</td><td>" +e[n]+ "</td></tr>";
+            ++n;
          };
       };
       document.getElementById("weighted").disabled = e.some(x => isNaN(x))
       parsed += '</table>';
-      document.getElementById("uploadinfo").innerHTML = "file info<br>number of lines: "+t.length;
+      document.getElementById("uploadinfo").innerHTML = "file info<br>number of lines: " + n;
       document.getElementById("output").innerHTML = parsed;
       document.getElementById("demo").innerHTML = txt;
    }
 
    function download() {
-      var i, out="";
-      for (i=0; i<gls.f.length; i++) {out += gls.f[i]+" "+gls.p[i]+"\n";}
+      var k, out="";
+      for (k=0; k<gls.f.length; k++) {out += gls.f[k]+" "+gls.p[k]+"\n";}
       document.getElementById("glsfile").href = "data:text/plain," + encodeURI(out);
    };
-
-   function transpose(mat) {
-   // transpose matrix
-      return mat[0].map(function(col, i) {
-         return mat.map(function(row) {
-            return row[i]
-         })
-      });
-   };
-
 </script>
 
 <h3>Data</h3>
