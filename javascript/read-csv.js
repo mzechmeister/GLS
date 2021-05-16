@@ -20,9 +20,9 @@ function handleURL(url) {
    getCSV(url, function(){
       if (lines.length)  {
          lines = lines.split(/\r\n|\n/)
-         //lines = lines.slice(1,-1);
          parse();
          plotdata(t,y,e);
+         setactive(csv=0);
       } else {
          document.getElementById("output").innerHTML = "<a href='"+url+"'>"+url+"</a><br> could not be loaded. Maybe a <a href='https://en.wikipedia.org/wiki/Cross-origin_resource_sharing'>CORS</a> issue. Try:<br>http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"
 // https://raw.githubusercontent.com/plotly/datasets/master/spectral.csv
@@ -53,7 +53,8 @@ function loadHandler(event) {
    var csv = event.target.result;
    lines = csv.split(/\r\n|\n/);
    parse();
-   plotdata(t,y);
+   plotdata(t,y,e);
+   setactive(csv=1)
 }
 
 function errorHandler(evt) {
