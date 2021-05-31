@@ -74,6 +74,9 @@ function parse() {
 
 function loaddata(){
    parse();
+   runGLS();
+   plotGLS(gls.f,gls.p);
+   download();
    plotdata(t,y,e);
 }
 
@@ -92,32 +95,60 @@ function download() {
 
 <h3>Data</h3>
 
-<div id="datafield">
-<div id="datafield_left" style="float: left; width: 33%;"
+<div id="datafield" style="display: flex;">
+<div id="datafield_left" style="flex: 1; min-width: 1px; display:flex; flex-direction: column;"
         ondragover="dragover(event)"
         ondrop="drop(event)">
-   <fieldset><legend>Data loading</legend>
-      <label>file:</label><label for="csvFileInput" class="input" style="display: inline-block;  text-align: left">Choose file</label><input id="csvFileInput" type="file" style="display:none" onchange="this.previousElementSibling.textContent = this.previousElementSibling.title = this.files[0].name; handleFiles(this.files)"><button onclick="this.previousElementSibling.click()">Browse...</button><br>
-      <label>url:</label><input type="url" id="urlFileInput" class="input" value="https://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"  onkeyup="if (event.key === 'Enter')  {handleURL(this.value)}"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value); "><br>
-      <label>delimiter:</label>
-      <select id="delim" onChange="parse()" title="regex for delimiter">
-         <option value=" +" title="multiple space" selected=true>" +"</option>
-         <option value=" " title="space">" "</option>
-         <option value="," title="comma">","</option>
-         <option value=";" title="semicolon">";"</option>
+   <fieldset style="display:flex; flex-direction: column; flex:1"><legend>Data loading</legend>
+      <div>
+         <label>file:</label><label for="csvFileInput" class="input" style="display: inline-block;  text-align: left">Choose file</label><input id="csvFileInput" type="file" style="display:none" onchange="this.previousElementSibling.textContent = this.previousElementSibling.title = this.files[0].name; handleFiles(this.files)"><button onclick="this.previousElementSibling.click()">Browse...</button><br>
+         <label>url:</label><input type="url" id="urlFileInput" class="input" value="https://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat" onkeyup="if (event.key === 'Enter')  {handleURL(this.value)}"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value); "><br>
+         <label>delimiter:</label>
+         <select id="delim" onChange="parse()" title="regex for delimiter">
+            <option value=" +" title="multiple space" selected=true>" +"</option>
+            <option value=" " title="space">" "</option>
+            <option value="," title="comma">","</option>
+            <option value=";" title="semicolon">";"</option>
          </select><br>
-      <div id="uploadinfo">
-      file info
+         <div id="uploadinfo">
+         file info
+         </div>
       </div>
-
-      <div id="output" style="height:200px;border:1px solid #ccc; overflow:auto;">
-      no data
+      <div  style="border:1px solid #ccc; flex:1; overflow:auto">
+         <div id="output" style="max-height: 20px;">
+         no data
+         </div>
       </div>
    </fieldset>
 </div>
+<div id="dataplot" style="height:300px; width:calc(100% - 400px);  resize: both; overflow: auto; direction: rtl;"></div>
 </div>
 
-<div id="dataplot" style="float: left; width: 66%; height: 300px"></div>
+<h3>Periodogram</h3>
+
+<div style="display:flex;">
+<div id="GLSinput"  style="flex: 1; min-width: 1px">
+   <form action="javascript:
+         loaddata()">
+   <fieldset><legend>Parameters</legend>
+      <span title="start frequency"><label>f<sub>beg</sub>:</label><input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
+      <span title="end frequency"><label>f<sub>end</sub>:</label><input type="float" id="fend" placeholder="auto"></span><br>
+      <span title="osampling factor for frequency steps"><label>ofac:</label><input type="float" id="ofac" placeholder="20"></span><br>
+      <label>mode:</label><span title="Generalisied Lomb-Scargle"><input type="radio" id="gls" name="gls" checked>GLS</span>
+      <span title="Lomb-Scargle (no floating offset)"><input type="radio" id="ls" name="gls">LS</span><br>
+      <span title="weight"><label></label><input type="checkbox" title="weight" id="weighted" value="weights" checked onclick="errorbar_visibility()">use errors</span><br>
+      <button style="float: right;">Calculate</button>
+   </fieldset>
+   </form>
+
+   <fieldset><legend>Results</legend>
+      <p id="demo"></p>
+      <label>file:</label> <a download='gls.dat' href="gls.dat" id="glsfile">gls.dat</a> (Periodogram in ascii format)
+   </fieldset>
+</div>
+<div id="GLSplot" style="height: 300px; width:calc(100% - 400px);  resize: both; overflow: auto; direction: rtl;">
+</div>
+</div>
 
 <script>
 // Optional. Show the copy icon when dragging over.
@@ -144,38 +175,146 @@ var fmtaxis = {tickformat: 'g',
    linecolor: 'black', mirror: true,
    ticks:"inside", "mirror" : "allticks", zeroline: false}
 
-function plotdata(x,y, e=[]) {
-   Plotly.newPlot('dataplot',
-      [{x:x, y:y,
-        error_y:{
+function plotdata(x,y, e=[]){
+
+   var trace1 = {
+      x: x,
+      y: y,
+      error_y: {
+         type: 'data',
+         array: e,
+         thickness: 1.,
+         width: 1.5,
+         color: x,
+      },
+      type: 'scatter',
+      showlegend: false,
+      mode: 'markers', marker:{color: x, line:{width: 0.5}, colorscale: 'Jet'},
+   };
+
+   P = 1 / gls.f[gls.k];
+   xmin = Math.min(...x)
+   xmax = Math.max(...x)
+   N = 100 * Math.ceil((xmax-xmin)/P)
+
+   amp = Math.sqrt(gls.Ak**2 + gls.Bk**2)
+   phk = Math.atan2(gls.Ak, gls.Bk) / (2.*Math.PI)
+   T0k = xmin - phk*P //fbest
+
+   tt = [...Array(N).keys()].map(i => xmin + i*P/100)
+   yy = tt.map(ti => Math.sin(2*Math.PI*(ti-T0k)/P)*amp+gls.Ck)
+
+   var sinmod = {
+      x: tt,
+      y: yy,
+      xaxis: 'x',
+      yaxis: 'y',
+      line: {color: 'black', width:1},
+      showlegend: false,
+   }
+
+   xx = [...Array(100).keys()].map(i => i*P/100)
+   var sinphase = {
+      x: xx,
+      y: xx.map(xi => Math.sin(2*Math.PI*xi/P)*amp+gls.Ck),
+      xaxis: 'x2',
+      yaxis: 'y',
+      line: {color: 'black', width:1},
+      showlegend: false,
+   }
+
+   var trace2 = {
+      x: x.map(x => ((x-T0k)%P+P)%P),
+      y: y,
+      error_y: {
+         type: 'data',
+         array: e,
+         thickness: 1.,
+         width: 1.5,
+         color: x
+      },
+      type: 'scatter',
+      mode: 'markers', marker:{color: x, line:{width: 0.5}, colorscale: 'Jet'},
+      xaxis: 'x2',
+      yaxis: 'y',
+      showlegend: false
+   }
+
+   var data = [sinmod, trace1, trace2, sinphase]
+   var xc = 0.65
+   var layout = {
+      xaxis: {
+         domain: [0, xc],
+         anchor: 'y1',
+         title: 'Time',
+         ...fmtaxis
+      },
+      yaxis: {
+         domain: [0, 1],
+         anchor: 'x1',
+         ...fmtaxis
+      },
+      xaxis2: {
+         title: 'Phase',
+         range: [0,P],
+         domain: [0.7, 1],
+         anchor: 'y2',
+         ...fmtaxis
+      },
+      margin: {l: 50, r: 10, b: 40, t: 10}
+   };
+
+   Plotly.newPlot('dataplot', data, layout, {responsive: true});
+   errorbar_visibility();
+};
+
+let observer = new MutationObserver(function(mutations) {
+   window.dispatchEvent(new Event('resize'));
+});
+
+let childdata = document.getElementById('dataplot');
+let childGLS = document.getElementById('GLSplot');
+//console.log(document.getElementById('dataplot'), document.getElementById('GLSplot'))
+observer.observe(childdata, {attributes: true})
+observer.observe(childGLS, {attributes: true})
+
+function plot_ph_y(x, y, e=[]) {
+   P = 1 / gls.f[gls.k];
+   Plotly.newPlot('phaseplot',
+      [{x: x.map(x => ((x-2450000)%P+P)%P), y:y,
+        error_y: {
           type: 'data',
           array: e,
           thickness: 1.,
           width: 1.5,
-          color: "#0000FF66"
+          color: x
         },
-        mode: 'markers', marker:{color: "#0000FFAA"}}],
-      {xaxis: {title: 'Time', ...fmtaxis},
+        mode: 'markers', marker:{color: x, line:{width: 0.5}}}],
+      {xaxis: {title: 'Phase', range:[0,P], ...fmtaxis},
        yaxis: fmtaxis,
        margin: {l: 50, r: 10, b: 40, t: 10},
        modebar: {position: 'bottom'},
       },
-      {responsive: true});
-      errorbar_visibility();
+      {responsive: true}
+   )
+   errorbar_visibility();
 }
 
 function errorbar_visibility(){
    visible = !document.getElementById('weighted').disabled && document.getElementById('weighted').checked
-   document.getElementsByClassName("errorbars")[0].style["visibility"] = visible? "visible" : "hidden";
+   var all = document.getElementsByClassName("errorbars");
+   for (x of all) {x.style["visibility"] = visible? "visible" : "hidden"};
    document.getElementsByClassName("ftable")[0].className = "ftable" + (visible? "" : " e_grey")
 }
 
 function plotGLS(x,y) {
    Plotly.newPlot('GLSplot',
-      [{x:x, y:y, line:{color: "#0000FFAA", width: 1}}],
-      {xaxis: {title: 'Frequency', ...fmtaxis},
-       yaxis: {rangemode: 'tozero', autorange: true, ...fmtaxis},
+      [{x:x, y:y, line: {color: "#0000FFAA", width: 1}}, 
+        {x:[gls.f[gls.k]], y:[gls.p[gls.k]], name: "1/fbest: "+(1/gls.f[gls.k])}],
+      {xaxis: {title: 'Frequency f', ...fmtaxis},
+       yaxis: {title: 'power p', rangemode: 'tozero', autorange: true, ...fmtaxis},
        margin: {l: 50, r: 10, b: 40, t: 10},
+       showlegend: false,
       },
       {responsive: true}
    )
@@ -183,33 +322,6 @@ function plotGLS(x,y) {
 
 </script>
 
-<br style="clear:both" />
-
-<h3>Periodogram</h3>
-
-<div id="GLSinput"  style="float: left; width: 33%">
-   <form action="javascript: runGLS(); plotGLS(gls.f,gls.p); download();">
-   <fieldset><legend>Parameters</legend>
-      <span title="start frequency"><label>f<sub>beg</sub>:</label><input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
-      <span title="end frequency"><label>f<sub>end</sub>:</label><input type="float" id="fend" placeholder="auto"></span><br>
-      <span title="osampling factor for frequency steps"><label>ofac:</label><input type="float" id="ofac" placeholder="20"></span><br>
-      <label>mode:</label><span title="Generalisied Lomb-Scargle"><input type="radio" id="gls" name="gls" checked>GLS</span>
-      <span title="Lomb-Scargle (no floating offset)"><input type="radio" id="ls" name="gls">LS</span><br>
-      <span title="weight"><label></label><input type="checkbox" title="weight" id="weighted" value="weights" checked onclick="errorbar_visibility()">use errors</span><br>
-      <button style="float: right;">Calculate</button>
-   </fieldset>
-   </form>
-
-   <fieldset><legend>Results</legend>
-      <p id="demo"></p>
-      <label>file:</label> <a download='gls.dat' href="gls.dat" id="glsfile">gls.dat</a> (Periodogram in ascii format)
-   </fieldset>
-</div>
-
-<div id="GLSplot" style="float: left; width: 66%; height: 300px">
-</div>
-
-<br style="clear:both" />
 
 <script src="read-csv.js"></script>
 <script src="gls.js"></script>

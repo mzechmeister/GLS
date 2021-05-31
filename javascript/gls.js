@@ -94,12 +94,12 @@ function GLS(t_data, y_data, kwargs) {
       CS -= C * S;            // Eq.(15)
       D = CC*SS - CS*CS;      // Eq.(6)
 
-// A[k] = (YC*SS-YS*CS) / D
-// B[k] = (YS*CC-YC*CS) / D
-// off[k] = -A[k]*C-B[k]*S
+      A = (YC*SS-YS*CS) / D
+      B = (YS*CC-YC*CS) / D
+      off = -A*C-B*S
 
       p[k] = (SS*YC*YC/D + CC*YS*YS/D - 2.*CS*YC*YS/D) / YY;  // Eq.(5)
-      if (p[k]>p[kbest]) {kbest = k;}
+      if (p[k]>p[kbest]) {kbest = k; Abest = A; Bbest = B; Cbest = off+ymean}
    };
-   return {p:p, f:f, k:kbest}
+   return {p:p, f:f, k:kbest, Ak:Abest, Bk:Bbest, Ck:Cbest}
 };
