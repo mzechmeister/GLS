@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
    <meta charset="utf-8">
@@ -24,7 +25,7 @@
          font-size: smaller;
          color: grey;
       }
-      
+
       .input {
          font-size: 1.2em;
          font-family: Tahoma;
@@ -33,55 +34,54 @@
          box-sizing: border-box;
          width:140px;
       }
-
    </style>
 </head>
 
 <body style="font-family: verdana; font-size: 70%">
 
 <script type="text/javascript">
-   function parse() {
-      delim = RegExp(document.getElementById('delim').value);
-      // parse data file into arrays and create table preview
-      var n=0, txt="Parsing";
+function parse() {
+   delim = RegExp(document.getElementById('delim').value);
+   // parse data file into arrays and create table preview
+   var n=0, txt="Parsing";
 
-      parsed = '<table class="ftable" style="width:50%; font-size: 100%">';
-      parsed += "<tr>";
-      parsed += "<td></td>";
-      parsed += "<td>t</td>";
-      parsed += "<td>y</td>";
-      parsed += "<td>e<sub>y</sub></td>";
-      parsed += "</tr>";
-      t = [];
-      y = [];
-      e = [];
-      for (line of lines) {
-         if (line!="") {
-            line = line.split(delim);
-            t.push(parseFloat(line[0]));
-            y.push(parseFloat(line[1]));
-            e.push(parseFloat(line[2]));
-            parsed += "<tr><td></td><td>"+t[n]+"</td><td>" +y[n]+"</td><td>" +e[n]+ "</td></tr>";
-            ++n;
-         };
+   parsed = '<table class="ftable" style="width:50%; font-size: 100%">';
+   parsed += "<tr>";
+   parsed += "<td></td>";
+   parsed += "<td>t</td>";
+   parsed += "<td>y</td>";
+   parsed += "<td>e<sub>y</sub></td>";
+   parsed += "</tr>";
+   t = [];
+   y = [];
+   e = [];
+   for (line of lines) {
+      if (line!="") {
+         line = line.split(delim);
+         t.push(parseFloat(line[0]));
+         y.push(parseFloat(line[1]));
+         e.push(parseFloat(line[2]));
+         parsed += "<tr><td></td><td>"+t[n]+"</td><td>" +y[n]+"</td><td>" +e[n]+ "</td></tr>";
+         ++n;
       };
-      document.getElementById("weighted").disabled = e.some(x => isNaN(x))
-      parsed += '</table>';
-      document.getElementById("uploadinfo").innerHTML = "file info<br>number of lines: " + n;
-      document.getElementById("output").innerHTML = parsed;
-      document.getElementById("demo").innerHTML = txt;
-   }
-
-   function download() {
-      var k, out="";
-      for (k=0; k<gls.f.length; k++) {out += gls.f[k]+" "+gls.p[k]+"\n";}
-      document.getElementById("glsfile").href = "data:text/plain," + encodeURI(out);
    };
+   document.getElementById("weighted").disabled = e.some(x => isNaN(x))
+   parsed += '</table>';
+   document.getElementById("uploadinfo").innerHTML = "file info<br>number of lines: " + n;
+   document.getElementById("output").innerHTML = parsed;
+   document.getElementById("demo").innerHTML = txt;
+}
+
+function download() {
+   var k, out="";
+   for (k=0; k<gls.f.length; k++) {out += gls.f[k]+" "+gls.p[k]+"\n";}
+   document.getElementById("glsfile").href = "data:text/plain," + encodeURI(out);
+}
 </script>
 
 <h3>Data</h3>
 
-<div id="datafield" style="width: 100%;">
+<div id="datafield">
 <div id="datafield_left" style="float: left; width: 33%;"
         ondragover="dragover(event)"
         ondrop="drop(event)">
@@ -109,29 +109,29 @@
 <div id="dataplot" style="float: left; width: 66%; height: 300px"></div>
 
 <script>
-   // Optional. Show the copy icon when dragging over.
-   function dragover(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-   };
+// Optional. Show the copy icon when dragging over.
+function dragover(e) {
+   e.stopPropagation();
+   e.preventDefault();
+   e.dataTransfer.dropEffect = 'copy';
+};
 
-   // Get file data on drop
-   function drop(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      document.getElementById("csvFileInput").previousSibling.textContent = e.dataTransfer.files[0].name
-      handleFiles(e.dataTransfer.files);
-   };
+// Get file data on drop
+function drop(e) {
+   e.stopPropagation();
+   e.preventDefault();
+   document.getElementById("csvFileInput").previousSibling.textContent = e.dataTransfer.files[0].name
+   handleFiles(e.dataTransfer.files);
+};
 
-   function setactive(csv){
-      document.getElementById("csvFileInput").previousSibling.style.color = csv? "" : "grey"
-      document.getElementById("urlFileInput").style.color =  csv? "grey" : ""
-   }
+function setactive(csv){
+   document.getElementById("csvFileInput").previousSibling.style.color = csv? "" : "grey"
+   document.getElementById("urlFileInput").style.color =  csv? "grey" : ""
+}
 
-   var fmtaxis = {tickformat: 'g',
-           linecolor: 'black', mirror: true,
-           ticks:"inside", "mirror" : "allticks"}
+var fmtaxis = {tickformat: 'g',
+   linecolor: 'black', mirror: true,
+   ticks:"inside", "mirror" : "allticks", zeroline: false}
 
 function plotdata(x,y, e=[]) {
    Plotly.newPlot('dataplot',
@@ -139,8 +139,8 @@ function plotdata(x,y, e=[]) {
         error_y:{
           type: 'data',
           array: e,
-          thickness:1.,
-          width:1.5,
+          thickness: 1.,
+          width: 1.5,
           color: "#0000FF66"
         },
         mode: 'markers', marker:{color: "#0000FFAA"}}],
@@ -151,7 +151,7 @@ function plotdata(x,y, e=[]) {
       },
       {responsive: true});
       errorbar_visibility();
-};
+}
 
 function errorbar_visibility(){
    visible = !document.getElementById('weighted').disabled && document.getElementById('weighted').checked
@@ -166,8 +166,9 @@ function plotGLS(x,y) {
        yaxis: {rangemode: 'tozero', autorange: true, ...fmtaxis},
        margin: {l: 50, r: 10, b: 40, t: 10},
       },
-      {responsive: true});
-};
+      {responsive: true}
+   )
+}
 
 </script>
 
