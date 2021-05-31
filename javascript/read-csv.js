@@ -8,7 +8,6 @@ function readURL(url, func) {
    rawFile.onreadystatechange = function () {
       if (rawFile.readyState === 4)
          if (rawFile.status === 200 || rawFile.status == 0) {
-             console.log(rawFile.status)
             lines = rawFile.responseText;
             func();
          }
@@ -22,8 +21,7 @@ function handleURL(url) {
    readURL(url, function(){
       if (lines.length) {
          lines = lines.split(/\r\n|\n/)
-         parse();
-         plotdata(t,y,e);
+         loaddata();
          setactive(csv=0);
       } else {
          document.getElementById("output").innerHTML = "<a href='"+url+"'>"+url+"</a><br> could not be loaded. Maybe a <a href='https://en.wikipedia.org/wiki/Cross-origin_resource_sharing'>CORS</a> issue. Try:<br>http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"
@@ -54,8 +52,7 @@ function getAsText(fileobj) {
 function loadHandler(evt) {
    var csv = evt.target.result;
    lines = csv.split(/\r\n|\n/);
-   parse();
-   plotdata(t,y,e);
+   loaddata()
    setactive(csv=1)
 }
 

@@ -72,6 +72,17 @@ function parse() {
    document.getElementById("demo").innerHTML = txt;
 }
 
+function loaddata(){
+   parse();
+   plotdata(t,y,e);
+}
+
+function runGLS() {
+   gls = GLS(t, y, {e_y: !document.getElementById('weighted').disabled && document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
+
+   document.getElementById('demo').innerHTML = '<label>f<sub>best</sub>:</label> '+gls.f[gls.k]+'<br><label>P<sub>best</sub>:</label> '+1/gls.f[gls.k]+'<br><label>p<sub>max</sub>:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
+}
+
 function download() {
    var k, out="";
    for (k=0; k<gls.f.length; k++) {out += gls.f[k]+" "+gls.p[k]+"\n";}
@@ -177,10 +188,7 @@ function plotGLS(x,y) {
 <h3>Periodogram</h3>
 
 <div id="GLSinput"  style="float: left; width: 33%">
-   <form action="javascript: plotdata(t,y,e);
-         gls = GLS(t,y,{e_y:!document.getElementById('weighted').disabled && document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
-         document.getElementById('demo').innerHTML = '<label>f<sub>best</sub>:</label> '+gls.f[gls.k]+'<br><label>P<sub>best</sub>:</label> '+1/gls.f[gls.k]+'<br><label>p<sub>max</sub>:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
-         plotGLS(gls.f,gls.p); download();">
+   <form action="javascript: runGLS(); plotGLS(gls.f,gls.p); download();">
    <fieldset><legend>Parameters</legend>
       <span title="start frequency"><label>f<sub>beg</sub>:</label><input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
       <span title="end frequency"><label>f<sub>end</sub>:</label><input type="float" id="fend" placeholder="auto"></span><br>
