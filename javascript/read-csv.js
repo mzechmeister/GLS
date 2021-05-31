@@ -1,24 +1,26 @@
 var lines;
 
-function getCSV(url, func) {
+function readURL(url, func) {
    var rawFile = new XMLHttpRequest();
  
    rawFile.open("GET", url, false);
    rawFile.overrideMimeType("text/plain");  // otherwise in firefox XML Parsing Error: syntax error
    rawFile.onreadystatechange = function () {
       if (rawFile.readyState === 4)
-         if (rawFile.status === 200 || rawFile.status == 0)
+         if (rawFile.status === 200 || rawFile.status == 0) {
+             console.log(rawFile.status)
             lines = rawFile.responseText;
             func();
-        };
-        rawFile.send();
+         }
+   };
+   rawFile.send();
 }
 
 function handleURL(url) {
    // Check for the various File API support.
    console.log("requesting", url)
-   getCSV(url, function(){
-      if (lines.length)  {
+   readURL(url, function(){
+      if (lines.length) {
          lines = lines.split(/\r\n|\n/)
          parse();
          plotdata(t,y,e);
@@ -40,17 +42,17 @@ function handleFiles(files) {
    }
 }
 
-function getAsText(fileToRead) {
+function getAsText(fileobj) {
    var reader = new FileReader();
    // Handle errors load
    reader.onload = loadHandler;
    reader.onerror = errorHandler;
    // Read file into memory as UTF-8
-   reader.readAsText(fileToRead);
+   reader.readAsText(fileobj);
 }
 
-function loadHandler(event) {
-   var csv = event.target.result;
+function loadHandler(evt) {
+   var csv = evt.target.result;
    lines = csv.split(/\r\n|\n/);
    parse();
    plotdata(t,y,e);
