@@ -102,7 +102,7 @@ function download() {
    <fieldset style="display:flex; flex-direction: column; flex:1"><legend>Data loading</legend>
       <div>
          <label>file:</label><label for="csvFileInput" class="input" style="display: inline-block;  text-align: left">Choose file</label><input id="csvFileInput" type="file" style="display:none" onchange="this.previousElementSibling.textContent = this.previousElementSibling.title = this.files[0].name; handleFiles(this.files)"><button onclick="this.previousElementSibling.click()">Browse...</button><br>
-         <label>url:</label><input type="url" id="urlFileInput" class="input" value="https://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat" onkeyup="if (event.key === 'Enter')  {handleURL(this.value)}"><input type="submit" value="Load" onclick="handleURL(document.getElementById('urlFileInput').value); "><br>
+         <label>url:</label><input type="url" id="url" class="input" value="https://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat" onkeyup="if (event.key === 'Enter')  {handleURL(this.value)}"><input type="submit" value="Load" onclick="handleURL(document.getElementById('url').value); "><br>
          <label>delimiter:</label>
          <select id="delim" onChange="parse()" title="regex for delimiter">
             <option value=" +" title="multiple space" selected=true>" +"</option>
@@ -168,7 +168,7 @@ function drop(e) {
 
 function setactive(csv){
    document.getElementById("csvFileInput").previousSibling.style.color = csv? "" : "grey"
-   document.getElementById("urlFileInput").style.color =  csv? "grey" : ""
+   document.getElementById("url").style.color =  csv? "grey" : ""
 }
 
 var fmtaxis = {tickformat: 'g',
@@ -329,11 +329,11 @@ function plotGLS(x,y) {
 
 <script>
 // allow to pre-fill fields via url, e.g.
-// https://raw.githack.com/mzechmeister/GLS/master/javascript/gls.html?fend=1&urlFileInput=https://cdsarc.unistra.fr/ftp/J/A%2BA/552/A78/harps/hr3259_h.dat&run
-// "run" is special keyword here
+// https://raw.githack.com/mzechmeister/GLS/master/javascript/gls.html?fend=1&url=https://cdsarc.unistra.fr/ftp/J/A%2BA/552/A78/harps/hr3259_h.dat&run
+// "run" is special keyword here and it should be the last keyword
    (new URL(window.location)).searchParams.forEach((x, y) => {
        console.log(x, y);
-        if (y=="run") {document.getElementById('urlFileInput').nextSibling.click()}
+        if (y=="run") {document.getElementById('url').nextSibling.click()}
         else {document.getElementById(y).value = x;}}
    );
 </script>
