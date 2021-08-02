@@ -327,6 +327,17 @@ function plotGLS(x,y) {
 <script src="gls.js"></script>
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 
+<script>
+// allow to pre-fill fields via url, e.g.
+// https://raw.githack.com/mzechmeister/GLS/master/javascript/gls.html?fend=1&urlFileInput=https://cdsarc.unistra.fr/ftp/J/A%2BA/552/A78/harps/hr3259_h.dat&run
+// "run" is special keyword here
+   (new URL(window.location)).searchParams.forEach((x, y) => {
+       console.log(x, y);
+        if (y=="run") {document.getElementById('urlFileInput').nextSibling.click()}
+        else {document.getElementById(y).value = x;}}
+   );
+</script>
+
 
 </body>
 
