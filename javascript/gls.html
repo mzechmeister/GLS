@@ -15,7 +15,7 @@
  
       td { padding: 0px 3px; }
 
-      .ftable tr:nth-child(n+2){
+      .ftable tr:nth-child(n+2) {
          counter-increment: rowNumber;
       }
       .ftable tr:nth-child(n+2) td:first-child::before {
@@ -72,10 +72,10 @@ function parse() {
    document.getElementById("demo").innerHTML = txt;
 }
 
-function loaddata(){
+function loaddata() {
    parse();
    runGLS();
-   plotGLS(gls.f,gls.p);
+   plotGLS(gls.f, gls.p);
    download();
    plotdata(t,y,e);
 }
@@ -166,7 +166,7 @@ function drop(e) {
    handleFiles(e.dataTransfer.files);
 };
 
-function setactive(csv){
+function setactive(csv) {
    document.getElementById("csvFileInput").previousSibling.style.color = csv? "" : "grey"
    document.getElementById("url").style.color =  csv? "grey" : ""
 }
@@ -175,7 +175,7 @@ var fmtaxis = {tickformat: 'g',
    linecolor: 'black', mirror: true,
    ticks:"inside", "mirror" : "allticks", zeroline: false}
 
-function plotdata(x,y, e=[]){
+function plotdata(x,y, e=[]) {
 
    var trace1 = {
       x: x,
@@ -300,7 +300,7 @@ function plot_ph_y(x, y, e=[]) {
    errorbar_visibility();
 }
 
-function errorbar_visibility(){
+function errorbar_visibility() {
    visible = !document.getElementById('weighted').disabled && document.getElementById('weighted').checked
    var all = document.getElementsByClassName("errorbars");
    for (x of all) {x.style["visibility"] = visible? "visible" : "hidden"};
@@ -328,13 +328,13 @@ function plotGLS(x,y) {
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 
 <script>
-// allow to pre-fill fields via url, e.g.
-// https://raw.githack.com/mzechmeister/GLS/master/javascript/gls.html?fend=1&url=https://cdsarc.unistra.fr/ftp/J/A%2BA/552/A78/harps/hr3259_h.dat&run
-// "run" is special keyword here and it should be the last keyword
+   // allow to pre-fill fields via url, e.g.
+   // https://raw.githack.com/mzechmeister/GLS/master/javascript/gls.html?fend=1&url=https://cdsarc.unistra.fr/ftp/J/A%2BA/552/A78/harps/hr3259_h.dat&run
+   // "run" is special keyword here and it should be the last keyword
    (new URL(window.location)).searchParams.forEach((x, y) => {
-       console.log(x, y);
-        if (y=="run") {document.getElementById('url').nextSibling.click()}
-        else {document.getElementById(y).value = x;}}
+      console.log(x, y);
+      if (y=="run") {document.getElementById('url').nextSibling.click()}
+      else {document.getElementById(y).value = x;}}
    );
 </script>
 
