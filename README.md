@@ -13,4 +13,4 @@ A collection of the GLS for different programming languages available in
 * [Javascript](javascript)
 * [Matlab](matlab)
 
-The online demo version (https://raw.githack.com/mzechmeister/GLS/master/javascript/gls.html) is based on [Javascript](javascript) and runs in the browser without any installation.
+The online demo version (http://raw.githack.com/mzechmeister/GLS/master/javascript/gls.html&run) is based on [Javascript](javascript) and runs in the browser without any installation.

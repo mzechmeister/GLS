@@ -102,7 +102,7 @@ function download() {
    <fieldset style="display:flex; flex-direction: column; flex:1"><legend>Data loading</legend>
       <div>
          <label>file:</label><label for="csvFileInput" class="input" style="display: inline-block;  text-align: left">Choose file</label><input id="csvFileInput" type="file" style="display:none" onchange="this.previousElementSibling.textContent = this.previousElementSibling.title = this.files[0].name; handleFiles(this.files)"><button onclick="this.previousElementSibling.click()">Browse...</button><br>
-         <label>url:</label><input type="url" id="url" class="input" value="https://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat" onkeyup="if (event.key === 'Enter')  {handleURL(this.value)}"><input type="submit" value="Load" onclick="handleURL(document.getElementById('url').value); "><br>
+         <label>url:</label><input type="url" id="url" class="input" value="http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat" onkeyup="if (event.key === 'Enter')  {handleURL(this.value)}"><input type="submit" value="Load" onclick="handleURL(document.getElementById('url').value); "><br>
          <label>delimiter:</label>
          <select id="delim" onChange="parse()" title="regex for delimiter">
             <option value=" +" title="multiple space" selected=true>" +"</option>
@@ -332,7 +332,7 @@ function plotGLS(x,y) {
 
 <script>
    // allow to pre-fill fields via url, e.g.
-   // https://raw.githack.com/mzechmeister/GLS/master/javascript/gls.html?fend=1&url=https://cdsarc.unistra.fr/ftp/J/A%2BA/552/A78/harps/hr3259_h.dat&run
+   // http://raw.githack.com/mzechmeister/GLS/master/javascript/gls.html?fend=1&url=http://cdsarc.unistra.fr/ftp/J/A%2BA/552/A78/harps/hr3259_h.dat&run
    // "run" is special keyword here and it should be the last keyword
    (new URL(window.location)).searchParams.forEach((x, y) => {
       console.log(x, y);
