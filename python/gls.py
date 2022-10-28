@@ -154,7 +154,7 @@ class Gls:
 
         # Output statistics
         if verbose:
-            self.info()
+            self.info(fap=kwargs.get('fap', []))
 
     def _assignTimeSeries(self, lc):
         """
@@ -432,7 +432,7 @@ class Gls:
             print("Failed to calcuate best-fit sine curve.")
             raise(e)
 
-    def info(self, stdout=True):
+    def info(self, stdout=True, fap=[]):
         """
         Prints some basic statistical output screen.
         """
@@ -445,6 +445,7 @@ class Gls:
            "Number of frequency points: %6d" % self.nf,
            "",
            "Maximum power p [%s]: %f" % (self.norm, self.power.max()),
+           "FAP(pmax):            %s" % self.FAP(),
            "RMS of residuals:     %f" % self.rms)
         if self.e_y is not None:
            lines += "  Mean weighted internal error:  %f" % (sqrt(self.N/sum(1./self.e_y**2))),
@@ -456,6 +457,8 @@ class Gls:
            #"Phase (T0):          {T0:f} +/- {e_T0:f}",
            #"Offset:              {offset:f} +/- {e_offset:f}",
            "-----------------------------------")
+        for fapi in fap:
+            lines += 'p(FAP=%s): %s' % (fapi, self.powerLevel(fapi)),
         text = "\n".join(lines).format(**self.best)
         if stdout:
            print(text)
@@ -850,6 +853,7 @@ if __name__ == "__main__":
   argadd('-ofac', '--ofac', type=float, help="Oversampling factor (default=10).", default=10)
   argadd('-hifac', '--hifac', type=float, help="Maximum frequency (default=1).", default=1)
   argadd('-fast', '--fast', help="Use trigonometric recurrences.", action='store_true')
+  argadd('-fap', '--fap', type=float, help="Output and plot false alarm probability levels.", nargs='+', default=[])
   argadd('-norm', '--norm', help="The normalization (default=ZK).", choices=Gls.norms, default='ZK')
   argadd('-ofile', '--ofile', type=str, help="Output file for results.")
   argadd('-noplot', '--noplot', help="Suppress plots.", dest='plot', action='store_false')
@@ -872,7 +876,7 @@ if __name__ == "__main__":
   gls = Gls(df, **args)
 
   if plot:
-     gls.plot(block=True)
+     gls.plot(block=True, fap=args['fap'])
 
   if ofile:
      gls.toFile(ofile)
