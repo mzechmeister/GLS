@@ -56,7 +56,7 @@ function parse() {
    y = [];
    e = [];
    for (line of lines) {
-      if (line!="") {
+      if (line != "") {
          line = line.split(delim);
          t.push(parseFloat(line[0]));
          y.push(parseFloat(line[1]));
@@ -261,7 +261,8 @@ function plotdata(x,y, e=[]) {
          anchor: 'y2',
          ...fmtaxis
       },
-      margin: {l: 50, r: 10, b: 40, t: 10}
+      margin: {l: 50, r: 10, b: 40, t: 10},
+      hovermode: 'closest',
    };
 
    Plotly.newPlot('dataplot', data, layout, {responsive: true});
@@ -294,6 +295,7 @@ function plot_ph_y(x, y, e=[]) {
        yaxis: fmtaxis,
        margin: {l: 50, r: 10, b: 40, t: 10},
        modebar: {position: 'bottom'},
+       hovermode: 'closest',
       },
       {responsive: true}
    )
@@ -315,6 +317,7 @@ function plotGLS(x,y) {
        yaxis: {title: 'power p', rangemode: 'tozero', autorange: true, ...fmtaxis},
        margin: {l: 50, r: 10, b: 40, t: 10},
        showlegend: false,
+       hovermode: 'closest',
       },
       {responsive: true}
    )
