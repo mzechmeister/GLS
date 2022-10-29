@@ -48,9 +48,9 @@ function parse() {
    parsed = '<table class="ftable" style="width:50%; font-size: 100%">';
    parsed += "<tr>";
    parsed += "<td></td>";
-   parsed += "<td>t</td>";
-   parsed += "<td>y</td>";
-   parsed += "<td>e<sub>y</sub></td>";
+   parsed += "<td><i title='time'>t</i></td>";
+   parsed += "<td><i title='data value'>y</i></td>";
+   parsed += "<td><i title='uncertainty'>e<sub>y</i></sub></td>";
    parsed += "</tr>";
    t = [];
    y = [];
@@ -83,7 +83,7 @@ function loaddata() {
 function runGLS() {
    gls = GLS(t, y, {e_y: !document.getElementById('weighted').disabled && document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
 
-   document.getElementById('demo').innerHTML = '<label>f<sub>best</sub>:</label> '+gls.f[gls.k]+'<br><label>P<sub>best</sub>:</label> '+1/gls.f[gls.k]+'<br><label>p<sub>max</sub>:</label> '+gls.p[gls.k]+'<br><label>nf:</label> '+gls.f.length;
+   document.getElementById('demo').innerHTML = '<label title="best frequency"><i>f</i><sub>best</sub>:</label> '+gls.f[gls.k]+'<br><label title="best period"><i>P</i><sub>best</sub>:</label> '+1/gls.f[gls.k]+'<br><label title="maximum power"><i>p</i><sub>max</sub>:</label> '+gls.p[gls.k]+'<br><label title="number of frequencies"><i>n<sub>f</sub></i>:</label> '+gls.f.length;
 }
 
 function download() {
@@ -131,8 +131,8 @@ function download() {
    <form action="javascript:
          loaddata()">
    <fieldset><legend>Parameters</legend>
-      <span title="start frequency"><label>f<sub>beg</sub>:</label><input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
-      <span title="end frequency"><label>f<sub>end</sub>:</label><input type="float" id="fend" placeholder="auto"></span><br>
+      <span title="start frequency"><label><i>f</i><sub>beg</sub>:</label><input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
+      <span title="end frequency"><label><i>f</i><sub>end</sub>:</label><input type="float" id="fend" placeholder="auto"></span><br>
       <span title="osampling factor for frequency steps"><label>ofac:</label><input type="float" id="ofac" placeholder="20"></span><br>
       <label>mode:</label><span title="Generalisied Lomb-Scargle"><input type="radio" id="gls" name="gls" checked>GLS</span>
       <span title="Lomb-Scargle (no floating offset)"><input type="radio" id="ls" name="gls">LS</span><br>
@@ -246,7 +246,7 @@ function plotdata(x,y, e=[]) {
       xaxis: {
          domain: [0, xc],
          anchor: 'y1',
-         title: 'Time',
+         title: 'Time <i>t</i>',
          ...fmtaxis
       },
       yaxis: {
@@ -312,9 +312,9 @@ function errorbar_visibility() {
 function plotGLS(x,y) {
    Plotly.newPlot('GLSplot',
       [{x:x, y:y, line: {color: "#0000FFAA", width: 1}}, 
-        {x:[gls.f[gls.k]], y:[gls.p[gls.k]], name: "1/fbest: "+(1/gls.f[gls.k])}],
-      {xaxis: {title: 'Frequency f', ...fmtaxis},
-       yaxis: {title: 'power p', rangemode: 'tozero', autorange: true, ...fmtaxis},
+        {x:[gls.f[gls.k]], y:[gls.p[gls.k]], name: "1/<i>f</i><sub>best</sub>: "+(1/gls.f[gls.k])}],
+      {xaxis: {title: 'Frequency <i>f</i>', ...fmtaxis},
+       yaxis: {title: 'Power <i>p</i>', rangemode: 'tozero', autorange: true, ...fmtaxis},
        margin: {l: 50, r: 10, b: 40, t: 10},
        showlegend: false,
        hovermode: 'closest',
