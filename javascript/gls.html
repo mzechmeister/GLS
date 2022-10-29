@@ -55,13 +55,14 @@ function parse() {
    t = [];
    y = [];
    e = [];
+   has_e = lines.some(l => l.split(delim)[2])
    for (line of lines) {
       if (line != "") {
          line = line.split(delim);
          t.push(parseFloat(line[0]));
          y.push(parseFloat(line[1]));
-         e.push(parseFloat(line[2]));
-         parsed += "<tr><td></td><td>"+t[n]+"</td><td>" +y[n]+"</td><td>" +e[n]+ "</td></tr>";
+         has_e && e.push(parseFloat(line[2]));
+         parsed += "<tr><td></td><td>"+t[n]+"</td><td>" +y[n]+"</td><td>" + (has_e? e[n]: '')+ "</td></tr>";
          ++n;
       };
    };
