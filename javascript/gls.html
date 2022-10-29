@@ -180,6 +180,7 @@ function plotdata(x,y, e=[]) {
    var trace1 = {
       x: x,
       y: y,
+      name: 'data',
       error_y: {
          type: 'data',
          array: e,
@@ -187,9 +188,11 @@ function plotdata(x,y, e=[]) {
          width: 1.5,
          color: x,
       },
+      hovertemplate: '%{text}',
+      text: x.map((xi,i) => i + ": " + xi + ", " + y[i] + (e.length ? " ± "+e[i] : "")),
       type: 'scatter',
       showlegend: false,
-      mode: 'markers', marker:{color: x, line:{width: 0.5}, colorscale: 'Jet'},
+      mode: 'markers', marker:{color: x, line:{width: 0.5}, colorscale: 'Portland'},
    };
 
    P = 1 / gls.f[gls.k];
@@ -209,6 +212,7 @@ function plotdata(x,y, e=[]) {
       y: yy,
       xaxis: 'x',
       yaxis: 'y',
+      hoverinfo: 'skip',
       line: {color: 'black', width:1},
       showlegend: false,
    }
@@ -219,6 +223,7 @@ function plotdata(x,y, e=[]) {
       y: xx.map(xi => Math.sin(2*Math.PI*xi/P)*amp+gls.Ck),
       xaxis: 'x2',
       yaxis: 'y',
+      hoverinfo: 'skip',
       line: {color: 'black', width:1},
       showlegend: false,
    }
@@ -226,6 +231,7 @@ function plotdata(x,y, e=[]) {
    var trace2 = {
       x: x.map(x => ((x-T0k)%P+P)%P),
       y: y,
+      name: 'data',
       error_y: {
          type: 'data',
          array: e,
@@ -233,8 +239,10 @@ function plotdata(x,y, e=[]) {
          width: 1.5,
          color: x
       },
+      hovertemplate: '%{text}',
+      text: x.map((xi,i) => i + ": " + xi + ", " + y[i] + (e.length ? " ± "+e[i] : "")),
       type: 'scatter',
-      mode: 'markers', marker:{color: x, line:{width: 0.5}, colorscale: 'Jet'},
+      mode: 'markers', marker:{color: x, line:{width: 0.5}, colorscale: 'Portland'},
       xaxis: 'x2',
       yaxis: 'y',
       showlegend: false
@@ -329,7 +337,7 @@ function plotGLS(x,y) {
 </body>
 
 <footer>
-view code on <a href="https://github.com/mzechmeister/GLS/tree/master/javascript">github</a>, by M. Zechmeister 2021-05-13
+view code on <a href="https://github.com/mzechmeister/GLS/tree/master/javascript">github</a>, by M. Zechmeister 2022-10-29
 </footer>
 
 </html>
