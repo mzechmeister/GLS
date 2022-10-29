@@ -240,7 +240,7 @@ function plotdata(x,y, e=[]) {
       showlegend: false
    }
 
-   var data = [sinmod, trace1, trace2, sinphase]
+   var traces = [sinmod, trace1, trace2, sinphase]
    var xc = 0.65
    var layout = {
       xaxis: {
@@ -265,7 +265,7 @@ function plotdata(x,y, e=[]) {
       hovermode: 'closest',
    };
 
-   Plotly.newPlot('dataplot', data, layout, {responsive: true});
+   Plotly.newPlot('dataplot', traces, layout, {responsive: true});
    errorbar_visibility();
 };
 
