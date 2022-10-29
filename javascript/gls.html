@@ -199,7 +199,7 @@ function plotdata(x,y, e=[]) {
 
    amp = Math.sqrt(gls.Ak**2 + gls.Bk**2)
    phk = Math.atan2(gls.Ak, gls.Bk) / (2.*Math.PI)
-   T0k = xmin - phk*P //fbest
+   T0k = xmin - phk*P
 
    tt = [...Array(N).keys()].map(i => xmin + i*P/100)
    yy = tt.map(ti => Math.sin(2*Math.PI*(ti-T0k)/P)*amp+gls.Ck)
@@ -288,10 +288,17 @@ function errorbar_visibility() {
 
 function plotGLS(x,y) {
    Plotly.newPlot('GLSplot',
-      [{x:x, y:y, line: {color: "#0000FFAA", width: 1}}, 
-        {x:[gls.f[gls.k]], y:[gls.p[gls.k]], name: "1/<i>f</i><sub>best</sub>: "+(1/gls.f[gls.k])}],
+      [{x:x, y:y, line: {color: "#0000FFAA", width: 1},
+        text: x.map(fk => 'P: '+1/fk),
+        name: ls.checked ? 'LS' : 'GLS'},
+       {x:[gls.f[gls.k]], y:[gls.p[gls.k]],
+        name: "best",
+        hovertemplate: "<i>p</i><sub>max</sub>: %{y:.6f}<br>"+
+                       "<i>f</i><sub>best</sub>: %{x}<br>" +              "<i>P</i><sub>best</sub>: " + (1/gls.f[gls.k])}],
       {xaxis: {title: 'Frequency <i>f</i>', ...fmtaxis},
-       yaxis: {title: 'Power <i>p</i>', rangemode: 'tozero', autorange: true, ...fmtaxis},
+       yaxis: {title: 'Power <i>p</i>', hoverformat: '.6f',
+               rangemode: 'tozero', autorange: true,
+               ...fmtaxis},
        margin: {l: 50, r: 10, b: 40, t: 10},
        showlegend: false,
        hovermode: 'closest',
