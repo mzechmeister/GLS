@@ -279,29 +279,6 @@ let childGLS = document.getElementById('GLSplot');
 observer.observe(childdata, {attributes: true})
 observer.observe(childGLS, {attributes: true})
 
-function plot_ph_y(x, y, e=[]) {
-   P = 1 / gls.f[gls.k];
-   Plotly.newPlot('phaseplot',
-      [{x: x.map(x => ((x-2450000)%P+P)%P), y:y,
-        error_y: {
-          type: 'data',
-          array: e,
-          thickness: 1.,
-          width: 1.5,
-          color: x
-        },
-        mode: 'markers', marker:{color: x, line:{width: 0.5}}}],
-      {xaxis: {title: 'Phase', range:[0,P], ...fmtaxis},
-       yaxis: fmtaxis,
-       margin: {l: 50, r: 10, b: 40, t: 10},
-       modebar: {position: 'bottom'},
-       hovermode: 'closest',
-      },
-      {responsive: true}
-   )
-   errorbar_visibility();
-}
-
 function errorbar_visibility() {
    visible = !document.getElementById('weighted').disabled && document.getElementById('weighted').checked
    var all = document.getElementsByClassName("errorbars");
