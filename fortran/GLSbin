@@ -1,0 +1,101 @@
+defaultopt=""    # place here your personal default options
+                 # e.g. "-k", (leading minus required)
+
+set -- $defaultopt $@  # concatenates default options and command line
+
+kep="#"; Kep=""; igls="#"; chi=""; calmass="#"
+while getopts ':cfhHikKmMrsvx-?' opt; do
+   case $opt in
+      i)  igls="";;
+      r)  replot="yes";;
+      s)  silent="yes";;
+      m)  calmass="";;
+      M)  calmass=""; silent="yes";;
+      k)  kep="";;
+      v)  chi="#";;
+      K)  kep="";Kep="#";;
+      -|c|v|f|m) ;;      # do nothing; options processed by GLS.f
+      x)  rm -f {,i}RV{Sin,Kep}Res.plt iGLS{fit,Kep,Sin}.log {GLS,fit}.log GLS{,Kep,Fit,}.plt GLS{,RV}.{ps,pdf}; exit;;
+      H)  less $GLSDir/ReadMe.txt; exit;;
+      h|?) help="yes";;
+   esac;
+done;
+
+### output of help
+if [ "$help" ]; then
+	cat <<-EOF
+	
+		##################################################
+		### GLS - Generalised Lomb-Scargle Periodogram ###
+		##################################################
+		
+		syntax:  GLS [OPTIONS] FILE fbeg fend mass
+		input file format: JD RV [RV_err]
+		
+		available options for the GLS program:
+		  -c       chi2 (weight errors, default)
+		  -f       fast computation of the Keplerian periodogram
+		  -h -?    help
+		  -H       view the ReadMe.txt
+		  -i       improve (refines the best GLS solution)
+		  -k       compute Keplerian periodogram
+		  -K       plot only Keplerian periodogram and orbit (no GLS)
+		  -m       companion mass calculation
+		  -M       only companion mass calculation (no periodogram)
+		           syntax: GLS -M mass[Msun] semi-amplitude[m/s] period[d] eccentricity
+		  -r       only replot
+		  -s       silent, no graphical output
+		  -v       variance (unweighted mode)
+		  -x       delete GLS product files
+		
+		you can set default options in the ~/bin/GLS script
+		see also ReadMe.txt for more information
+		         by Mathias Zechmeister 2012-08-03 (v2.3.02)
+	EOF
+   exit
+fi
+
+
+#### execute the GLS ####
+[ $replot ] || $GLSDir/GLS.e $@ || exit
+
+#### refine the GLS solution ####
+           refinefile="$GLSDir/fitsin.gnu"
+eval $kep  refinefile="$GLSDir/fitkep.gnu"
+eval $igls gnuplot - <<<"chi='$chi'; calmass='$calmass'"  $refinefile 2>/dev/null
+
+#### graphical output ####
+if [ ! "$silent" ]; then
+   kep="kep='$kep'; Kep='$Kep'; igls='$igls'; chi='$chi'"
+
+   ### output periodogram ###
+   [ ! "$igls" ] && [ "$replot" ] || (echo $kep; cat $GLSDir/GLSplot.gnu $GLSDir/zoom.gnu; echo pause mouse key) | gnuplot &
+
+   ### output RV curves ###
+#   echo -e "$kep; load '$GLSDir/GLSRVandPhased.gnu'\n pause mouse key" | gnuplot &
+   (echo $kep; cat $GLSDir/GLSRVandPhased.gnu $GLSDir/zoom.gnu; echo pause mouse key) | gnuplot &
+   sed '/term post/s/^#//' - <<<"$kep" $GLSDir/GLSRVandPhased.gnu    | gnuplot  # ps and pdf plots
+   epstopdf GLSRV.ps
+   #   echo -e "$kep ; load '$GLSDir/GLSRV.gnu';\n  pause mouse key" | gnuplot &
+fi
+
+# END
+
+# Changes in version v2.3.01 (2011-09-13):
+# new: output of refine mode more similar to standard mode
+# new: output of mass function
+# new: option -M (only companion mass calculation)
+# new: option -H (view the ReadMe)
+# new: option -x (clear the directory from GLS products)
+# fix: pseudo error bars are not shown in unweighted mode
+# fix: refine option in unweighted mode
+# change: physical constants updated
+# improved: interactive x11 (gnuplot >v4.2; for gnuplot v4.2 there is now at least a unzoom key 'u')
+# NOTE: this version does not work with the old GLS.log file!
+
+# Changes in version v2.3.02 (2012-08-03):
+# fix: exit immediately when file does not exits
+# fix: no gnuplot zombies even when exit with 'q' (v4.2)
+# new: zoom and pan with arrow keys
+# fix: precision of pi
+

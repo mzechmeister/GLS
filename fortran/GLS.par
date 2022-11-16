@@ -1,0 +1,4 @@
+20             # ofac: oversampling factor for frequency (frequency step = 1/ofac/T)
+2              # weightening exponent (variance: wexp=0, chi2: wexp=2)
+0.0 0.91 0.02  # eccentricity grid: e_min e_max e_step
+0 359          # Periastron passage grid: x0_min x0max (in degree)
