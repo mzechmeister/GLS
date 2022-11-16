@@ -106,7 +106,7 @@ c      write(6,*) EeM(en,Mn),EeM(en,Mn+1),(EeM(en,Mn)+EeM(en,Mn+1))*.5
       END
 
       SUBROUTINE SetupTrAneM(emin,emax,estep)                   ! setup interpolation table
-      DOUBLE PRECISION v(1:100,0:1024),TrAn,M,e,twopi,pi
+      DOUBLE PRECISION v(1:100,0:1024),TrAn,M,e,twopi,pi,
      1  emin,emax,estep
       INTEGER en/0/,nM
       COMMON /CONST/ twopi
@@ -197,7 +197,7 @@ c     !!! weightening of errors: wexp=0 (variance), wexp=2 (Chi2) !!!
       DOUBLE PRECISION twopi,
      1   JD(Nmax),RV(Nmax),RVerr(Nmax),phase(Nmax),
      2   t(Nmax), wy(Nmax),ww(Nmax), v(Nmax),
-     3   JDmin/1.E38/,tbase/0/,RVmean/0/,wsum,YY/0/,
+     3   JDmin/1.E38/,tbase/0/,RVmean/0/,wsum,YY,
      4   rmssin/0/,rmskep/0/,chisin/0/,chikep/0/,wrmssin/0/,wrmskep/0/,
      5   pow,powLS,powSin/0/,powKep/0/,powKe,SW,
      6   Freq,Fbeg,Fend,step,ofac/20./,
@@ -209,6 +209,7 @@ c     !!! weightening of errors: wexp=0 (variance), wexp=2 (Chi2) !!!
       COMMON /data/ v,wy,ww,YY,N
       COMMON /CONST/ twopi
       twopi = 2.*DATAN2(0.d0,-1.d0)
+      YY    = 0
 
 c     read parameters
       inquire(file="GLS.par", exist=exists)
