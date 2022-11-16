@@ -7,7 +7,7 @@ M. Zechmeister & M. Kürster, *The generalised Lomb-Scargle periodogram. A new f
 A collection of the GLS for different programming languages available in
 
 * [C](c)
-* Fortran
+* [Fortran](fortran)
 * [Python](python)
 * [IDL](idl)
 * [Javascript](javascript)
