@@ -1,3 +1,8 @@
+# Download all files
+
+svn export https://github.com/mzechmeister/GLS/trunk/fortran GLS
+cd GLS
+
 # Compile with
 
 make
