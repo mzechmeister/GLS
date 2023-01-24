@@ -21,11 +21,11 @@ N = length(t);
 % center time
 tmin = min(t);
 t = t - tmin;
-tbase = max(t) - tmin;
+tbase = max(t);
 
 % default f:
 if nargin<3
-    ofac = 2;
+    ofac = 10;
     hifac = 1;q
     fstep = 1 / tbase / ofac ; % frequency sampling depends on the time span, default for start frequency
     fbeg = fstep;
