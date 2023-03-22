@@ -496,7 +496,7 @@ class Gls:
         fbest, T0 = self.best["f"], self.best["T0"]
 
         fig = mpl.figure()
-        fig.canvas.set_window_title('GLS periodogram')
+        fig.canvas.manager.set_window_title('GLS periodogram')
         fig.subplots_adjust(hspace=0.05, wspace=0.04, right=0.97, bottom=0.09, top=0.84)
         fs = 10   # fontsize
 
