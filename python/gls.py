@@ -342,18 +342,18 @@ class Gls:
             power = (self.N-3)/2. * p / (1.-self.p.max())
         elif norm == "chisq":
             power = self._YY *self.wsum * (1.-p)
-            self.label["ylabel"] = "$\chi^2$"
+            self.label["ylabel"] = r"$\chi^2$"
         elif norm == "wrms":
             power = sqrt(self._YY*(1.-p))
             self.label["ylabel"] = "wrms"
         elif norm == "lnL":
             chi2 = self._YY *self.wsum * (1.-p)
             power = -0.5*chi2 - 0.5*np.sum(np.log(2*np.pi * self.e_y**2))
-            self.label["ylabel"] = "$\ln L$"
+            self.label["ylabel"] = r"$\ln L$"
         elif norm == "dlnL":
             # dlnL = lnL - lnL0 = -0.5 chi^2 + 0.5 chi0^2 = 0.5 (chi0^2 - chi^2) = 0.5 chi0^2 p
             power = 0.5 * self._YY * self.wsum * p
-            self.label["ylabel"] = "$\Delta\ln L$"
+            self.label["ylabel"] = r"$\Delta\ln L$"
 
         self.power = power
 
