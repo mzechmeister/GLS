@@ -7,7 +7,7 @@
    <style type="text/css">
       label {
          display: inline-block;
-         width: 4em;
+         width: 8ch;
          text-align: right;
       }
 
@@ -32,7 +32,7 @@
          padding: 0.1em;
          border: 1px solid #ccc;
          box-sizing: border-box;
-         width:140px;
+         width: 140px;
       }
    </style>
 </head>
@@ -78,13 +78,18 @@ function loaddata() {
    runGLS();
    plotGLS(gls.f, gls.p);
    download();
-   plotdata(t,y,e);
+   plotdata(t, y, e);
 }
 
 function runGLS() {
-   gls = GLS(t, y, {e_y: !document.getElementById('weighted').disabled && document.getElementById('weighted').checked && e, ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value, fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
+   gls = GLS(t, y, {e_y: !document.getElementById('weighted').disabled && document.getElementById('weighted').checked && e,
+            ofac:document.getElementById('ofac').value, fbeg:document.getElementById('fbeg').value,
+            fend:document.getElementById('fend').value, ls:document.getElementById('ls').checked});
 
-   document.getElementById('demo').innerHTML = '<label title="best frequency"><i>f</i><sub>best</sub>:</label> '+gls.f[gls.k]+'<br><label title="best period"><i>P</i><sub>best</sub>:</label> '+1/gls.f[gls.k]+'<br><label title="maximum power"><i>p</i><sub>max</sub>:</label> '+gls.p[gls.k]+'<br><label title="number of frequencies"><i>n<sub>f</sub></i>:</label> '+gls.f.length;
+   document.getElementById('demo').innerHTML = '<label title="best frequency"><i>f</i><sub>best</sub>:</label> ' + gls.f[gls.k] +
+        '<br><label title="best period"><i>P</i><sub>best</sub>:</label> ' + 1/gls.f[gls.k] +
+        '<br><label title="maximum power"><i>p</i><sub>max</sub>:</label> ' + gls.p[gls.k] +
+        '<br><label title="number of frequencies"><i>n<sub>f</sub></i>:</label> ' + gls.f.length;
 }
 
 function download() {
@@ -102,11 +107,14 @@ function download() {
         ondrop="drop(event)">
    <fieldset style="display:flex; flex-direction: column; flex:1"><legend>Data loading</legend>
       <div>
-         <label>file:</label><label for="csvFileInput" class="input" style="display: inline-block;  text-align: left">Choose file</label><input id="csvFileInput" type="file" style="display:none" onchange="this.previousElementSibling.textContent = this.previousElementSibling.title = this.files[0].name; handleFiles(this.files)"><button onclick="this.previousElementSibling.click()">Browse...</button><br>
-         <label>url:</label><input type="url" id="url" class="input" value="http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat" onkeyup="if (event.key === 'Enter')  {handleURL(this.value)}"><input type="submit" value="Load" onclick="handleURL(document.getElementById('url').value); ">
+         <label>file:</label> <label for="csvFileInput" class="input" style="display: inline-block; text-align: left">Choose file</label>
+         <input id="csvFileInput" type="file" style="display:none" onchange="this.previousElementSibling.textContent = this.previousElementSibling.title = this.files[0].name; handleFiles(this.files)">
+         <button onclick="this.previousElementSibling.click()">Browse...</button><br>
+         <label>url:</label> <input type="url" id="url" class="input" value="http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat" onkeyup="if (event.key === 'Enter') {handleURL(this.value)}">
+         <input type="submit" value="Load" onclick="handleURL(document.getElementById('url').value); ">
          <button title="Ctrl+V" style="float: right;" onclick="navigator.clipboard.readText().then(clipText => {lines=clipText.split('\n'); loaddata()})">
    📋 paste</button><br>
-         <label>delimiter:</label>
+         <label>delimiter: </label>
          <select id="delim" onChange="parse()" title="regex for delimiter">
             <option value=" +" title="multiple space" selected=true>" +"</option>
             <option value=" " title="space">" "</option>
@@ -124,7 +132,7 @@ function download() {
       </div>
    </fieldset>
 </div>
-<div id="dataplot" style="height:300px; width:calc(100% - 400px);  resize: both; overflow: auto; direction: rtl;"></div>
+<div id="dataplot" style="height:300px; width:calc(100% - 400px); resize: both; overflow: auto; direction: rtl;"></div>
 </div>
 
 <h3>Periodogram</h3>
@@ -134,12 +142,12 @@ function download() {
    <form action="javascript:
          loaddata()">
    <fieldset><legend>Parameters</legend>
-      <span title="start frequency"><label><i>f</i><sub>beg</sub>:</label><input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
-      <span title="end frequency"><label><i>f</i><sub>end</sub>:</label><input type="float" id="fend" placeholder="auto"></span><br>
-      <span title="osampling factor for frequency steps"><label>ofac:</label><input type="float" id="ofac" placeholder="20"></span><br>
+      <span title="start frequency"><label><i>f</i><sub>beg</sub>:</label> <input type="float" id="fbeg" title="start frequency" placeholder="auto"></span><br>
+      <span title="end frequency"><label><i>f</i><sub>end</sub>:</label> <input type="float" id="fend" placeholder="auto"></span><br>
+      <span title="osampling factor for frequency steps"><label>ofac:</label> <input type="float" id="ofac" placeholder="20"></span><br>
       <label>mode:</label><span title="Generalisied Lomb-Scargle"><input type="radio" id="gls" name="gls" checked>GLS</span>
-      <span title="Lomb-Scargle (no floating offset)"><input type="radio" id="ls" name="gls">LS</span><br>
-      <span title="weight"><label></label><input type="checkbox" title="weight" id="weighted" value="weights" checked onclick="errorbar_visibility()">use errors</span><br>
+      <span title="Lomb-Scargle (no floating offset)"> <input type="radio" id="ls" name="gls">LS</span><br>
+      <span title="weight"><label></label> <input type="checkbox" title="weight" id="weighted" value="weights" checked onclick="errorbar_visibility()">use errors</span><br>
       <button style="float: right;">Calculate</button>
    </fieldset>
    </form>
@@ -286,7 +294,6 @@ let observer = new MutationObserver(function(mutations) {
 
 let childdata = document.getElementById('dataplot');
 let childGLS = document.getElementById('GLSplot');
-//console.log(document.getElementById('dataplot'), document.getElementById('GLSplot'))
 observer.observe(childdata, {attributes: true})
 observer.observe(childGLS, {attributes: true})
 
@@ -305,7 +312,8 @@ function plotGLS(x,y) {
        {x:[gls.f[gls.k]], y:[gls.p[gls.k]],
         name: "best",
         hovertemplate: "<i>p</i><sub>max</sub>: %{y:.6f}<br>"+
-                       "<i>f</i><sub>best</sub>: %{x}<br>" +              "<i>P</i><sub>best</sub>: " + (1/gls.f[gls.k])}],
+                       "<i>f</i><sub>best</sub>: %{x}<br>" +
+                       "<i>P</i><sub>best</sub>: " + (1/gls.f[gls.k])}],
       {xaxis: {title: 'Frequency <i>f</i>', ...fmtaxis},
        yaxis: {title: 'Power <i>p</i>', hoverformat: '.6f',
                rangemode: 'tozero', autorange: true,
@@ -319,9 +327,9 @@ function plotGLS(x,y) {
 }
 
 datafield.addEventListener("paste", (event) => {
-  event.preventDefault()
-  lines = (event.clipboardData || window.clipboardData).getData("text").split("\n")
-  loaddata()
+   event.preventDefault()
+   lines = (event.clipboardData || window.clipboardData).getData("text").split("\n")
+   loaddata()
 })
 </script>
 
@@ -342,10 +350,9 @@ datafield.addEventListener("paste", (event) => {
 </script>
 
 
-</body>
-
 <footer>
 view code on <a href="https://github.com/mzechmeister/GLS/tree/master/javascript">github</a>, by M. Zechmeister 2022-10-29
 </footer>
+</body>
 
 </html>
