@@ -182,7 +182,7 @@ function setactive(csv) {
    document.getElementById("url").style.color =  csv? "grey" : ""
 }
 
-var fmtaxis = {tickformat: 'g',
+var fmtaxis = {tickformat: '~',
    linecolor: 'black', mirror: true,
    ticks:"inside", "mirror" : "allticks", zeroline: false}
 
@@ -336,7 +336,7 @@ datafield.addEventListener("paste", (event) => {
 
 <script src="read-csv.js"></script>
 <script src="gls.js"></script>
-<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script src="https://cdn.plot.ly/plotly-3.7.0.min.js"></script>
 
 <script>
    // allow to pre-fill fields via url, e.g.
