@@ -173,12 +173,12 @@ function dragover(e) {
 function drop(e) {
    e.stopPropagation();
    e.preventDefault();
-   document.getElementById("csvFileInput").previousSibling.textContent = e.dataTransfer.files[0].name
+   document.getElementById("csvFileInput").previousElementSibling.textContent = e.dataTransfer.files[0].name
    handleFiles(e.dataTransfer.files);
 };
 
 function setactive(csv) {
-   document.getElementById("csvFileInput").previousSibling.style.color = csv? "" : "grey"
+   document.getElementById("csvFileInput").previousElementSibling.style.color = csv? "" : "grey"
    document.getElementById("url").style.color =  csv? "grey" : ""
 }
 
