@@ -177,9 +177,9 @@ function drop(e) {
    handleFiles(e.dataTransfer.files);
 };
 
-function setactive(csv) {
-   document.getElementById("csvFileInput").previousElementSibling.style.color = csv? "" : "grey"
-   document.getElementById("url").style.color =  csv? "grey" : ""
+function setactive(csv=0) {
+   document.getElementById("csvFileInput").previousElementSibling.style.color = csv==1? "" : "grey"
+   document.getElementById("url").style.color =  csv ==2 ? "" : "grey"
 }
 
 var fmtaxis = {tickformat: "~",  // no SI praefix and no trailing zeros
@@ -338,6 +338,7 @@ datafield.addEventListener("paste", (event) => {
    event.preventDefault()
    lines = (event.clipboardData || window.clipboardData).getData("text").split("\n")
    loaddata()
+   setactive()
 })
 </script>
 
