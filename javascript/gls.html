@@ -182,9 +182,11 @@ function setactive(csv) {
    document.getElementById("url").style.color =  csv? "grey" : ""
 }
 
-var fmtaxis = {tickformat: '~',
-   linecolor: 'black', mirror: true,
-   ticks:"inside", "mirror" : "allticks", zeroline: false}
+var fmtaxis = {tickformat: "~",  // no SI praefix and no trailing zeros
+   ticklen: 8, ticks: "inside", mirror: "allticks",
+   minor: {ticks: "inside", tickcolor: "#bbb"},
+   linecolor: "black", zeroline: false,
+}
 
 function plotdata(x,y, e=[]) {
 
@@ -233,7 +235,7 @@ function plotdata(x,y, e=[]) {
       x: xx,
       y: xx.map(xi => Math.sin(2*Math.PI*xi/P)*amp+gls.Ck),
       xaxis: 'x2',
-      yaxis: 'y',
+      yaxis: 'y2',
       hoverinfo: 'skip',
       line: {color: 'black', width:1},
       showlegend: false,
@@ -255,7 +257,7 @@ function plotdata(x,y, e=[]) {
       type: 'scatter',
       mode: 'markers', marker:{color: x, line:{width: 0.5}, colorscale: 'Portland'},
       xaxis: 'x2',
-      yaxis: 'y',
+      yaxis: 'y2',
       showlegend: false
    }
 
@@ -269,7 +271,6 @@ function plotdata(x,y, e=[]) {
          ...fmtaxis
       },
       yaxis: {
-         domain: [0, 1],
          anchor: 'x1',
          ...fmtaxis
       },
@@ -279,6 +280,12 @@ function plotdata(x,y, e=[]) {
          domain: [0.7, 1],
          anchor: 'y2',
          ...fmtaxis
+      },
+      yaxis2: {
+         showticklabels: false,
+         matches: 'y',
+         anchor: 'x2',
+         ...fmtaxis,
       },
       margin: {l: 50, r: 10, b: 40, t: 10},
       hovermode: 'closest',
