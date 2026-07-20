@@ -327,6 +327,7 @@ function plotGLS(x,y) {
 }
 
 datafield.addEventListener("paste", (event) => {
+   if (event.target.tagName == "INPUT") return   // allow to paste to url
    event.preventDefault()
    lines = (event.clipboardData || window.clipboardData).getData("text").split("\n")
    loaddata()
