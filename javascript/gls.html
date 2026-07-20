@@ -267,7 +267,7 @@ function plotdata(x,y, e=[]) {
       xaxis: {
          domain: [0, xc],
          anchor: 'y1',
-         title: 'Time <i>t</i>',
+         title: {text: 'Time <i>t</i>'},
          ...fmtaxis
       },
       yaxis: {
@@ -275,7 +275,7 @@ function plotdata(x,y, e=[]) {
          ...fmtaxis
       },
       xaxis2: {
-         title: 'Phase',
+         title: {text: 'Phase'},
          range: [0,P],
          domain: [0.7, 1],
          anchor: 'y2',
@@ -321,8 +321,8 @@ function plotGLS(x,y) {
         hovertemplate: "<i>p</i><sub>max</sub>: %{y:.6f}<br>"+
                        "<i>f</i><sub>best</sub>: %{x}<br>" +
                        "<i>P</i><sub>best</sub>: " + (1/gls.f[gls.k])}],
-      {xaxis: {title: 'Frequency <i>f</i>', ...fmtaxis},
-       yaxis: {title: 'Power <i>p</i>', hoverformat: '.6f',
+      {xaxis: {title: {text: 'Frequency <i>f</i>'}, ...fmtaxis},
+       yaxis: {title: {text: 'Power <i>p</i>'}, hoverformat: '.6f',
                rangemode: 'tozero', autorange: true,
                ...fmtaxis},
        margin: {l: 50, r: 10, b: 40, t: 10},
