@@ -353,7 +353,7 @@ datafield.addEventListener("paste", (event) => {
    // "run" is special keyword here and it should be the last keyword
    (new URL(window.location)).searchParams.forEach((x, y) => {
       console.log(x, y);
-      if (y=="run") {document.getElementById('url').nextSibling.click()}
+      if (y=="run") {document.getElementById('url').nextElementSibling.click()}
       else {document.getElementById(y).value = x;}}
    );
 </script>
