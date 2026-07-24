@@ -18,8 +18,7 @@ function handleURL(url) {
    console.log("requesting", url)
    readURL(url, function(){
       if (ta.value.length) {
-         loaddata();
-         setactive(csv=2);
+         loaddata('url');
       } else {
          document.getElementById("output").innerHTML = "<a href='"+url+"'>"+url+"</a><br> could not be loaded. Maybe a <a href='https://en.wikipedia.org/wiki/Cross-origin_resource_sharing'>CORS</a> issue. Try:<br>http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat"
 // https://raw.githubusercontent.com/plotly/datasets/master/spectral.csv
@@ -48,8 +47,7 @@ function getAsText(fileobj) {
 
 function loadHandler(evt) {
    ta.value = evt.target.result;
-   loaddata()
-   setactive(csv=1)
+   loaddata('file')
 }
 
 function errorHandler(evt) {

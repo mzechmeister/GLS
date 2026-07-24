@@ -89,7 +89,8 @@ function parse() {
    document.getElementById("demo").innerHTML = txt;
 }
 
-function loaddata() {
+function loaddata(newsrc=null) {
+   if(newsrc) setactive(newsrc)
    prevLen = ta.value.length
    parse();
    runGLS();
@@ -200,10 +201,11 @@ function drop(e) {
    handleFiles(e.dataTransfer.files);
 };
 
-function setactive(csv) {
-   document.getElementById("csvFileInput").previousElementSibling.style.color = csv==1? "" : "grey"
-   document.getElementById("url").style.color =  csv ==2 ? "" : "grey"
-   if(csv!=null) preview.checked = true
+function setactive(src) {
+   document.getElementById('csvFileInput').previousElementSibling.style.color = src=='file' ? '' : 'grey'
+   document.getElementById('url').style.color = src=='url' ? '' : 'grey'
+   document.querySelector('[for="raw"]').style.color = src=='edit' ? '' : 'grey'
+   if(src!=null) preview.checked = true
 }
 
 var fmtaxis = {tickformat: "~",  // no SI praefix and no trailing zeros
@@ -357,11 +359,11 @@ function plotGLS(x,y) {
    )
 }
 
-ta.addEventListener("change", setactive)
+ta.addEventListener('change', e => setactive('edit'))
 prevLen = 0
-ta.addEventListener("input", (event) => {
+ta.addEventListener('input', e => {
    // detect a larger sudden change, likely pasting or row deleting
-   if (Math.abs(ta.value.length - prevLen) > 20) {loaddata(); setactive(0)}
+   if (Math.abs(ta.value.length - prevLen) > 20) loaddata('edit')
    prevLen = ta.value.length
 })
 </script>
