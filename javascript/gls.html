@@ -105,7 +105,7 @@ function download() {
 <div id="datafield_left" style="flex: 1; min-width: 1px; display:flex; flex-direction: column;"
         ondragover="dragover(event)"
         ondrop="drop(event)">
-   <fieldset style="display:flex; flex-direction: column; flex:1"><legend>Data loading</legend>
+   <fieldset style="display:flex; flex-direction: column; flex:1; min-width: 1px;"><legend>Data loading</legend>
       <div>
          <label>file:</label> <label for="csvFileInput" class="input" style="display: inline-block; text-align: left">Choose file</label>
          <input id="csvFileInput" type="file" style="display:none" onchange="this.previousElementSibling.textContent = this.previousElementSibling.title = this.files[0].name; handleFiles(this.files)">
