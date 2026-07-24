@@ -70,6 +70,7 @@ function parse() {
    t = [];
    y = [];
    e = [];
+   lines = ta.value.split(/\r\n|\n/)
    has_e = lines.some(l => l.split(delim)[2])
    for (line of lines) {
       if (line != "") {
@@ -89,6 +90,7 @@ function parse() {
 }
 
 function loaddata() {
+   prevLen = ta.value.length
    parse();
    runGLS();
    plotGLS(gls.f, gls.p);
@@ -133,7 +135,7 @@ function download() {
          </div>
       </div>
       <input type="radio" id="raw" name="view" checked>
-      <input type="radio" id="preview" name="view" onclick="lines=ta.value.split('\n'); loaddata()">
+      <input type="radio" id="preview" name="view" onclick="loaddata()">
       <div style="display: flex; align-items: center; ">
          <label for="raw" style="border-top-left-radius: 4px; border-bottom-left-radius: 4px;">edit</label>
          <label for="preview"  style="border-top-right-radius: 4px; border-bottom-right-radius: 4px;">preview</label>
@@ -198,9 +200,10 @@ function drop(e) {
    handleFiles(e.dataTransfer.files);
 };
 
-function setactive(csv=0) {
+function setactive(csv) {
    document.getElementById("csvFileInput").previousElementSibling.style.color = csv==1? "" : "grey"
    document.getElementById("url").style.color =  csv ==2 ? "" : "grey"
+   if(csv!=null) preview.checked = true
 }
 
 var fmtaxis = {tickformat: "~",  // no SI praefix and no trailing zeros
@@ -358,7 +361,7 @@ ta.addEventListener("change", setactive)
 prevLen = 0
 ta.addEventListener("input", (event) => {
    // detect a larger sudden change, likely pasting or row deleting
-   if (Math.abs(ta.value.length - prevLen) > 20) {lines = ta.value.split('\n'); loaddata()}
+   if (Math.abs(ta.value.length - prevLen) > 20) {loaddata(); setactive(0)}
    prevLen = ta.value.length
 })
 </script>

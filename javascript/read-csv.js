@@ -1,5 +1,3 @@
-var lines;
-
 function readURL(url, func) {
    var rawFile = new XMLHttpRequest();
  
@@ -8,7 +6,7 @@ function readURL(url, func) {
    rawFile.onreadystatechange = function () {
       if (rawFile.readyState === 4)
          if (rawFile.status === 200 || rawFile.status == 0) {
-            lines = rawFile.responseText;
+            ta.value = rawFile.responseText;
             func();
          }
    };
@@ -19,8 +17,7 @@ function handleURL(url) {
    // Check for the various File API support.
    console.log("requesting", url)
    readURL(url, function(){
-      if (lines.length) {
-         lines = lines.split(/\r\n|\n/)
+      if (ta.value.length) {
          loaddata();
          setactive(csv=2);
       } else {
@@ -50,8 +47,7 @@ function getAsText(fileobj) {
 }
 
 function loadHandler(evt) {
-   var csv = evt.target.result;
-   lines = csv.split(/\r\n|\n/);
+   ta.value = evt.target.result;
    loaddata()
    setactive(csv=1)
 }
