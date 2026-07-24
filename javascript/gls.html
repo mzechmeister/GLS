@@ -34,6 +34,21 @@
          box-sizing: border-box;
          width: 140px;
       }
+      [name=view], #raw:not(:checked) ~ #ta, #preview:not(:checked) ~ #ta + div {
+         display: none;
+      }
+      [for=raw], [for=preview] {
+         border: 1px solid white;
+         padding: 3px;
+         text-align: center;
+      }
+      [for=raw]:hover, [for=preview]:hover {
+         border-color: #8CF;
+      }
+      #raw:checked ~ div > [for=raw] , #preview:checked ~ div > [for=preview] {
+         background: #8CF;
+         border-color: #8CF;
+      }
    </style>
 </head>
 
@@ -112,20 +127,26 @@ function download() {
          <button onclick="this.previousElementSibling.click()">Browse...</button><br>
          <label>url:</label> <input type="url" id="url" class="input" value="http://cdsarc.unistra.fr/ftp/J/A+A/552/A78/harps/hr3259_h.dat" onkeyup="if (event.key === 'Enter') {handleURL(this.value)}">
          <input type="submit" value="Load" onclick="handleURL(document.getElementById('url').value); ">
-         <button title="Ctrl+V" style="float: right;" onclick="navigator.clipboard.readText().then(clipText => {lines=clipText.split('\n'); loaddata()})">
-   📋 paste</button><br>
-         <label>delimiter: </label>
+         <br>
+         <div id="uploadinfo">
+         file info
+         </div>
+      </div>
+      <input type="radio" id="raw" name="view" checked>
+      <input type="radio" id="preview" name="view" onclick="lines=ta.value.split('\n'); loaddata()">
+      <div style="display: flex; align-items: center; ">
+         <label for="raw" style="border-top-left-radius: 4px; border-bottom-left-radius: 4px;">edit</label>
+         <label for="preview"  style="border-top-right-radius: 4px; border-bottom-right-radius: 4px;">preview</label>
+         <label style="flex-grow: 1">delimiter: 
          <select id="delim" onChange="parse()" title="regex for delimiter">
             <option value=" +" title="multiple space" selected=true>" +"</option>
             <option value=" " title="space">" "</option>
             <option value="," title="comma">","</option>
             <option value=";" title="semicolon">";"</option>
-         </select><br>
-         <div id="uploadinfo">
-         file info
-         </div>
+         </select></label>
       </div>
-      <div  style="border:1px solid #ccc; flex:1; overflow:auto">
+      <textarea id="ta" style="border:1px solid #ccc; flex:1; overflow:auto; white-space: pre; resize: none;"></textarea>
+      <div style="border:1px solid #ccc; flex:1; overflow:auto; margin: 1px 0px;">
          <div id="output" style="max-height: 20px;">
          no data
          </div>
@@ -333,12 +354,12 @@ function plotGLS(x,y) {
    )
 }
 
-datafield.addEventListener("paste", (event) => {
-   if (event.target.tagName == "INPUT") return   // allow to paste to url
-   event.preventDefault()
-   lines = (event.clipboardData || window.clipboardData).getData("text").split("\n")
-   loaddata()
-   setactive()
+ta.addEventListener("change", setactive)
+prevLen = 0
+ta.addEventListener("input", (event) => {
+   // detect a larger sudden change, likely pasting or row deleting
+   if (Math.abs(ta.value.length - prevLen) > 20) {lines = ta.value.split('\n'); loaddata()}
+   prevLen = ta.value.length
 })
 </script>
 
