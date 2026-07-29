@@ -41,6 +41,7 @@
          border: 1px solid white;
          padding: 3px;
          text-align: center;
+         user-select: none;
       }
       [for=raw]:hover, [for=preview]:hover {
          border-color: #8CF;
@@ -156,7 +157,7 @@ function download() {
       </div>
    </fieldset>
 </div>
-<div id="dataplot" style="height:300px; width:calc(100% - 400px); resize: both; overflow: auto; direction: rtl;"></div>
+<div id="dataplot" style="height:300px; width:calc(100% - 400px); resize: both; overflow: hidden; direction: rtl;"></div>
 </div>
 
 <h3>Periodogram</h3>
@@ -181,7 +182,7 @@ function download() {
       <label>file:</label> <a download='gls.dat' href="gls.dat" id="glsfile">gls.dat</a> (Periodogram in ascii format)
    </fieldset>
 </div>
-<div id="GLSplot" style="height: 300px; width:calc(100% - 400px);  resize: both; overflow: auto; direction: rtl;">
+<div id="GLSplot" style="height: 300px; width:calc(100% - 400px);  resize: both; overflow: hidden; direction: rtl;">
 </div>
 </div>
 
