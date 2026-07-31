@@ -34,8 +34,15 @@
          box-sizing: border-box;
          width: 140px;
       }
-      [name=view], #raw:not(:checked) ~ #ta, #preview:not(:checked) ~ #ta + div {
+      [name=view], #preview:not(:checked) ~ #ta + div {
          display: none;
+      }
+      #raw:not(:checked) ~ #ta { /* emulate display:none, but keeps history */
+          border: none;
+          margin: 0;
+          max-height: 0px;
+          padding: 0;
+          pointer-events: none;
       }
       [for=raw], [for=preview] {
          border: 1px solid white;
