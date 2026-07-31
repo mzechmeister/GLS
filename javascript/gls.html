@@ -38,7 +38,7 @@
          display: none;
       }
       #raw:not(:checked) ~ #ta { /* emulate display:none, but keeps history */
-          border: none;
+          border: none !important;
           margin: 0;
           max-height: 0px;
           padding: 0;
@@ -143,7 +143,7 @@ function download() {
          file info
          </div>
       </div>
-      <input type="radio" id="raw" name="view" checked>
+      <input type="radio" id="raw" name="view" onclick="ta.focus()" checked>
       <input type="radio" id="preview" name="view" onclick="loaddata()">
       <div style="display: flex; align-items: center; ">
          <label for="raw" style="border-top-left-radius: 4px; border-bottom-left-radius: 4px;">edit</label>
@@ -371,7 +371,7 @@ ta.addEventListener('change', e => setactive('edit'))
 prevLen = 0
 ta.addEventListener('input', e => {
    // detect a larger sudden change, likely pasting or row deleting
-   if (Math.abs(ta.value.length - prevLen) > 20) loaddata('edit')
+   if ((e.inputType=="insertFromPaste") & Math.abs(ta.value.length - prevLen) > 20) loaddata('edit')
    prevLen = ta.value.length
 })
 </script>
